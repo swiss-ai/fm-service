@@ -3,7 +3,17 @@ from fastapi import FastAPI, Request, Depends
 from fastapi.responses import StreamingResponse
 from config import get_endpoint_by_model_name, get_all_available_models
 from llm import proxy
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 def data_generator(response, generation):
     for chunk in response:
