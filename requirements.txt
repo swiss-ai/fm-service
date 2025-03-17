@@ -6,3 +6,5 @@ pydantic
 loguru
 aiohttp
 async-lru
+backoff
+langfuse
