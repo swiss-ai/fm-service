@@ -4,3 +4,5 @@ httpx
 python-dotenv
 pydantic
 loguru
+aiohttp
+async-lru
