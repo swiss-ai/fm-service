@@ -10,7 +10,6 @@ available_endpoints = [
     }
 ]
 
-@alru_cache(maxsize=32)
 async def get_ocf_models(endpoint):
     target_url = f"{endpoint}/v1/dnt/table"
     try:
@@ -47,7 +46,6 @@ async def get_endpoint_by_model_name(model_name):
                 candidates.append(endpoint)
     return random.choice(candidates)
 
-@alru_cache(maxsize=32)
 async def get_all_available_models():
     models = []
     for endpoint in available_endpoints:
