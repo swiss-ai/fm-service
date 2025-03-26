@@ -1,7 +1,7 @@
 import os
 import json
 import logfire
-from fastapi import FastAPI, Request, Depends
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import StreamingResponse
 from config import get_endpoint_by_model_name, get_all_available_models
 from llm import proxy
@@ -34,7 +34,11 @@ def data_generator(response, generation):
 @app.post("/v1/chat/completions", dependencies=[])
 async def completion(request: Request):
     data = await request.json()
-    target = await get_endpoint_by_model_name(data['model'])
+    try:
+        target = await get_endpoint_by_model_name(data['model'])
+    except Exception as e:
+        return HTTPException(status_code=404, detail="Item not found")
+    
     target = f"{target['url']}/v1/service/llm/v1"
     response = proxy(target, **data)
     if 'stream' in data and data['stream'] == True:
