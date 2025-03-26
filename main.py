@@ -1,4 +1,6 @@
+import os
 import json
+import logfire
 from fastapi import FastAPI, Request, Depends
 from fastapi.responses import StreamingResponse
 from config import get_endpoint_by_model_name, get_all_available_models
@@ -14,6 +16,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+if os.getenv("LOGFIRE_TOKEN", None):
+    logfire.configure(token=os.getenv("LOGFIRE_TOKEN"))
+    logfire.instrument_fastapi(app, capture_headers=True)
 
 def data_generator(response, generation):
     for chunk in response:
@@ -53,6 +59,26 @@ async def list_models():
         "object": "list",
         "data": model_objects
     }
+
+@app.get("/v1/models_detailed")
+async def list_models():
+    """List all available models in OpenAI format."""
+    models = await get_all_available_models(extended=True)
+    model_objects = []
+    for model in models:
+        model_objects.append({
+            "id": model.get("id", "unknown"),
+            "object": "model",
+            "created": model.get("created", 0),
+            "owned_by": model.get("owned_by", "0x"),
+            "device": model.get("device", "unknown")
+        })
+    
+    return {
+        "object": "list",
+        "data": model_objects
+    }
+
 
 if __name__ == "__main__":
     import uvicorn
