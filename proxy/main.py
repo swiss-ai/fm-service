@@ -82,12 +82,15 @@ async def completion(
         target = await get_endpoint_by_model_name(data['model'])
     except Exception as e:
         raise HTTPException(status_code=404, detail="model provider not found")
+    
+    api_key = "sk-rc-test"
     if target['type'] == "ocf":
         target_url = f"{target['url']}/v1/service/llm/v1"
     elif target['type'] == "openai":
         target_url = f"{target['url']}"
+        api_key = profile[target['prefix']]
         data['model'] = data['model'].replace(f"{target['prefix']}/", "")
-    response = proxy(target_url, profile[target['prefix']], **data)
+    response = proxy(target_url, api_key, **data)
     if 'stream' in data and data['stream'] == True:
         return StreamingResponse(
             data_generator(response, response.generation), 
