@@ -1,6 +1,6 @@
 import backoff
-from protocols import ModelResponse, RetryConstantError, RetryExpoError, UnknownLLMError
 from langfuse.openai import openai
+from proxy.protocols import ModelResponse, RetryConstantError, RetryExpoError, UnknownLLMError
 
 def handle_llm_exception(e: Exception):
     if isinstance(
