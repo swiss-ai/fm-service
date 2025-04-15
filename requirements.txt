@@ -11,3 +11,4 @@ langfuse
 openai
 logfire[fastapi]
 sqlmodel
+psycopg2-binary
