@@ -10,3 +10,4 @@ backoff
 langfuse
 openai
 logfire[fastapi]
+sqlmodel

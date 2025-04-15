@@ -3,7 +3,7 @@ import uuid
 import time
 from openai._models import BaseModel as OpenAIObject
 from typing import Dict, List, Literal, Optional, Tuple, Union
-
+from pydantic import BaseModel
 
 def _generate_id():  # private helper function
     return "chatcmpl-" + str(uuid.uuid4())
@@ -462,3 +462,7 @@ class RetryExpoError(Exception):
     pass
 class UnknownLLMError(Exception):
     pass
+
+class ProviderKeySubmission(BaseModel):
+    provider: str
+    api_key: str

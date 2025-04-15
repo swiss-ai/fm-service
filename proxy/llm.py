@@ -1,8 +1,4 @@
-import os
 import backoff
-import threading
-from typing import Dict
-from collections import defaultdict
 from protocols import ModelResponse, RetryConstantError, RetryExpoError, UnknownLLMError
 from langfuse.openai import openai
 
@@ -41,11 +37,13 @@ def handle_llm_exception(e: Exception):
     max_value=100,
     factor=1.5,
 )
-def proxy(endpoint, **kwargs) -> ModelResponse:
+def proxy(endpoint, api_key, **kwargs) -> ModelResponse:
+    print(f"endpoint: {endpoint}")
+    print(f"api_key: {api_key}")
     def _completion():
         try:
             client = openai.OpenAI(
-                api_key=kwargs.get('api_key', 'test'),
+                api_key=api_key,
                 base_url=endpoint,
             )
             kwargs['name']="chat-generation"
