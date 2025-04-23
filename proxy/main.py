@@ -7,16 +7,17 @@ from contextlib import asynccontextmanager
 from sqlmodel import create_engine, Session
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI, Request, HTTPException, Depends
+from fastapi import FastAPI, Request, HTTPException, Depends, Security
+
 
 from proxy.llm import proxy
 from proxy.entities import ProviderKey
 from proxy.config import get_endpoint_by_model_name, get_all_available_models
-from proxy.utils import construct_profile
+from proxy.utils import construct_profile, VerifyToken
 
 token_auth_scheme = HTTPBearer()
 engine = None
-
+auth = VerifyToken()
 known_profiles = {}
 
 @asynccontextmanager
@@ -156,6 +157,11 @@ async def submit_key(
         "status": "created",
         "data": provider_key
     }
+
+@app.get("/api/private")
+def private(auth_result: str = Security(auth.verify)): # 👈 Use Security and the verify method to protect your endpoints
+    """A valid access token is required to access this route"""
+    return auth_result
 
 if __name__ == "__main__":
     import uvicorn
