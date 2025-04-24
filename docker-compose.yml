@@ -18,6 +18,23 @@ services:
     volumes:
       - ./:/app
 
+  frontend:
+    image: node:20-alpine
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./apps:/app
+    command: >
+      sh -c "npm install && 
+             npm run build &&
+             npm run preview:network -- --port 3000"
+    environment:
+      - PUBLIC_API_URL=http://localhost:8080
+    depends_on:
+      - app
+    restart: unless-stopped
+
   postgres:
     image: postgres:16-alpine
     ports:

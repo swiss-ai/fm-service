@@ -23,7 +23,7 @@ def handle_llm_exception(e: Exception):
         raise e
     else:
         raise UnknownLLMError from e
-    
+
 @backoff.on_exception(
     wait_gen=backoff.constant,
     exception=RetryConstantError,
@@ -37,21 +37,19 @@ def handle_llm_exception(e: Exception):
     max_value=100,
     factor=1.5,
 )
-def proxy(endpoint, api_key, **kwargs) -> ModelResponse:
-    print(f"endpoint: {endpoint}")
-    print(f"api_key: {api_key}")
-    def _completion():
+async def proxy(endpoint, api_key, **kwargs) -> ModelResponse:
+    async def _completion():
         try:
-            client = openai.OpenAI(
+            client = openai.AsyncOpenAI(
                 api_key=api_key,
                 base_url=endpoint,
             )
             kwargs['name']="chat-generation"
-            response = client.chat.completions.create(**kwargs)
+            response = await client.chat.completions.create(**kwargs)
             return response
         except Exception as e:
             handle_llm_exception(e) # this tries fallback requests
     try:
-        return _completion()
+        return await _completion()
     except Exception as e:
         raise e
