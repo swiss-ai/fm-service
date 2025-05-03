@@ -20,6 +20,7 @@ window.onload = function () {
   let lastSentImages = []; // Store a copy of sent images for better UX
   let currentReader = null; // To track the current streaming reader
   let currentResponse = null; // To track the current response element
+  let userProfile = null; // To store the user profile
   
   // Initialize LaTeX rendering options
   if (window.renderMathInElement) {
@@ -35,51 +36,121 @@ window.onload = function () {
   }
   
   // Initialize
-  // TEMPLATES 
-  fetchModels();  // OFFLINETEST
-  // setupTestModel(); // OFFLINETEST
-  loadChatHistory();
-  initEventListeners();
+  init();
   
-  // Setup close sidebar when clicking outside
-  document.addEventListener("click", function(e) {
-    const sidebar = document.getElementById("chatSidebar");
-    const hamburger = document.getElementById("hamburgerMenu");
+  async function init() {
+    await authenticateUser();
+    fetchModels();
+    loadChatHistory();
+    initEventListeners();
     
-    if (window.innerWidth <= 768 && sidebar && hamburger) {
-      if (sidebar.classList.contains("show") && 
-          !sidebar.contains(e.target) && 
-          e.target !== hamburger && 
-          !hamburger.contains(e.target)) {
-        sidebar.classList.remove("show");
+    // Setup close sidebar when clicking outside
+    document.addEventListener("click", function(e) {
+      const sidebar = document.getElementById("chatSidebar");
+      const hamburger = document.getElementById("hamburgerMenu");
+      
+      if (window.innerWidth <= 768 && sidebar && hamburger) {
+        if (sidebar.classList.contains("show") && 
+            !sidebar.contains(e.target) && 
+            e.target !== hamburger && 
+            !hamburger.contains(e.target)) {
+          sidebar.classList.remove("show");
+        }
       }
-    }
-  });
+    });
 
-  // Setup keyboard event listeners for focusing on input field
-  document.addEventListener('keydown', function(e) {
-    // If a key a-zA-Z0-9 is pressed and not in an input field, focus on chat message input
-    const key = e.key;
-    const isAlphaNumeric = /^[a-zA-Z0-9]$/.test(key);
-    const notInInput = !['INPUT', 'TEXTAREA', 'DIV'].includes(document.activeElement.tagName) || 
-                       (document.activeElement.tagName === 'DIV' && document.activeElement.id !== 'chatMessage');
-    const noModifiers = !(e.altKey || e.ctrlKey || e.metaKey || e.shiftKey);
-    
-    if (isAlphaNumeric && notInInput && noModifiers) {
-      chatMessageElem.focus();
+    // Setup keyboard event listeners for focusing on input field
+    document.addEventListener('keydown', function(e) {
+      // If a key a-zA-Z0-9 is pressed and not in an input field, focus on chat message input
+      const key = e.key;
+      const isAlphaNumeric = /^[a-zA-Z0-9]$/.test(key);
+      const notInInput = !['INPUT', 'TEXTAREA', 'DIV'].includes(document.activeElement.tagName) || 
+                        (document.activeElement.tagName === 'DIV' && document.activeElement.id !== 'chatMessage');
+      const noModifiers = !(e.altKey || e.ctrlKey || e.metaKey || e.shiftKey);
       
-      // For contenteditable, we need to use selection and range
-      const selection = window.getSelection();
-      const range = document.createRange();
-      range.selectNodeContents(chatMessageElem);
-      range.collapse(false); // Move to end
-      selection.removeAllRanges();
-      selection.addRange(range);
+      if (isAlphaNumeric && notInInput && noModifiers) {
+        chatMessageElem.focus();
+        
+        // For contenteditable, we need to use selection and range
+        const selection = window.getSelection();
+        const range = document.createRange();
+        range.selectNodeContents(chatMessageElem);
+        range.collapse(false); // Move to end
+        selection.removeAllRanges();
+        selection.addRange(range);
+        
+        // We don't add the typed character for contenteditable - it will happen naturally
+        e.preventDefault();
+      }
+    });
+  }
+
+  // Authenticate user and get API key
+  async function authenticateUser() {
+    try {
+      // Try to get access token from localStorage or auth provider
+      const accessToken = localStorage.getItem('accessToken');
       
-      // We don't add the typed character for contenteditable - it will happen naturally
-      e.preventDefault();
+      if (!accessToken) {
+        console.log('No access token found. User may need to log in.');
+        return;
+      }
+      
+      // Verify access token with backend
+      const response = await fetch(`${BASE_URL}/api/auth/verify_token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ accessToken }),
+      });
+      
+      if (!response.ok) {
+        console.error('Token verification failed:', response.status);
+        localStorage.removeItem('accessToken');
+        return;
+      }
+      
+      const data = await response.json();
+      userProfile = data.profile;
+      
+      // Set the API key for requests
+      API_KEY = userProfile.api_key;
+      
+      console.log('User authenticated successfully');
+      
+      // Update UI to show user is logged in
+      updateAuthUI();
+    } catch (error) {
+      console.error('Authentication error:', error);
     }
-  });
+  }
+
+  // Update UI based on authentication status
+  function updateAuthUI() {
+    // Add authentication status to header
+    const headerLeft = document.querySelector('.header-left');
+    
+    if (headerLeft && userProfile) {
+      // Check if auth info already exists
+      let authInfo = document.querySelector('.auth-info');
+      
+      if (!authInfo) {
+        // Create auth info element
+        authInfo = document.createElement('div');
+        authInfo.className = 'auth-info';
+        headerLeft.appendChild(authInfo);
+      }
+      
+      // Update auth info content
+      authInfo.innerHTML = `
+        <span class="user-name">${userProfile.name || 'User'}</span>
+        <a href="/api_key" class="api-key-link" title="Manage API Key">
+          <i class="fas fa-key"></i>
+        </a>
+      `;
+    }
+  }
 
   function initEventListeners() {
     // Send message button
@@ -324,11 +395,19 @@ window.onload = function () {
   }
 
   function fetchModels() {
-    fetch(`${BASE_URL}/models`, {
+    // Create headers with Authentication
+    const headers = {
+      "Content-Type": "application/json",
+    };
+    
+    // Add Authorization header if API_KEY is available
+    if (API_KEY) {
+      headers["Authorization"] = `Bearer ${API_KEY}`;
+    }
+    
+    fetch(`${BASE_URL}/v1/models`, {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: headers,
     })
       .then(response => {
         if (!response.ok) {
@@ -834,12 +913,21 @@ window.onload = function () {
     }
 
     try {
-      const response = await fetch(`${BASE_URL}/chat/completions`, {
+      // Create headers with Authentication
+      const headers = {
+        "Content-Type": "application/json",
+      };
+      
+      // Add Authorization header if API_KEY is available
+      if (API_KEY) {
+        headers["Authorization"] = `Bearer ${API_KEY}`;
+      } else {
+        throw new Error("No API key available. Please log in.");
+      }
+      
+      const response = await fetch(`${BASE_URL}/v1/chat/completions`, {
         method: "POST",
-        headers: {
-          "Authorization": `Bearer ${API_KEY}`,
-          "Content-Type": "application/json",
-        },
+        headers: headers,
         body: JSON.stringify(messageBody),
       });
 
@@ -847,7 +935,27 @@ window.onload = function () {
         const errorText = await response.text();
         console.error(`API Error: ${response.status} ${response.statusText}`, errorText);
         
-        // Create error message with retry button
+        // If unauthorized, prompt user to log in
+        if (response.status === 401) {
+          localStorage.removeItem('accessToken');
+          API_KEY = null;
+          
+          // Create error message with login link
+          const errorContainer = document.createElement('div');
+          errorContainer.className = 'error-message';
+          errorContainer.innerHTML = `
+            <div class="error-content">
+              <p>Error: Authentication required</p>
+              <p class="error-details">Please <a href="/login">log in</a> to continue.</p>
+            </div>
+          `;
+          
+          // Add error message to chat
+          chatOutputElem.appendChild(errorContainer);
+          return;
+        }
+        
+        // Create error message with retry button for other errors
         const errorContainer = document.createElement('div');
         errorContainer.className = 'error-message';
         errorContainer.innerHTML = `

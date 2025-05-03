@@ -6,7 +6,10 @@ import ArrowCard from "@components/ArrowCard.astro";
 import ModelList from "@components/ui/ModelList.svelte";
 import Link from "@components/Link.astro";
 import { SITE, HOME } from "@consts";
+import { SignIn, SignOut } from 'auth-astro/components';
+import { getSession } from 'auth-astro/server';
 
+export const prerender = false;
 const docs = (await getCollection("guides"))
   .filter(post => !post.data.draft)
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
@@ -17,6 +20,7 @@ const articles = (await getCollection("articles"))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
   .slice(0,SITE.NUM_PROJECTS_ON_HOMEPAGE);
 
+const session = await getSession(Astro.request);
 ---
 
 <PageLayout title={HOME.TITLE} description={HOME.DESCRIPTION}>
@@ -24,6 +28,35 @@ const articles = (await getCollection("articles"))
     <h4 class="animate font-semibold text-black dark:text-white">
       Welcome to Research Computer <span class="text-xl">👋🏻</span> 
     </h4>
+    
+    <div class="my-6 flex flex-col md:flex-row items-start md:items-center gap-4">
+      {session ? (
+        <div class="w-full flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div class="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
+            <p class="text-sm text-gray-600 dark:text-gray-400">Logged in as</p>
+            <p class="font-medium text-black dark:text-white">{session.user?.name || 'User'}</p>
+          </div>
+          <div class="flex gap-3">
+            <a href="/api_key" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded transition-colors">
+              View API Key
+            </a>
+            <SignOut class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded transition-colors">
+              Logout
+            </SignOut>
+          </div>
+        </div>
+      ) : (
+        <div class="w-full flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <p class="text-gray-700 dark:text-gray-300">
+            Sign in to get your API key and access our LLM services.
+          </p>
+          <SignIn provider="auth0" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition-colors">
+            Login with Auth0
+          </SignIn>
+        </div>
+      )}
+    </div>
+    
     <div class="space-y-16">
       <section>
         <article class="space-y-4">
@@ -38,6 +71,7 @@ const articles = (await getCollection("articles"))
           </p>
         </article>
       </section>
+      
       <section>
         <p class="animate dark:text-white">
           Models currently available on the platform:
@@ -46,6 +80,7 @@ const articles = (await getCollection("articles"))
           <ModelList client:load />
         </div>
       </section>
+      
       <section class="animate space-y-6">
         <div class="flex flex-wrap gap-y-2 items-center justify-between">
           <h5 class="font-semibold text-black dark:text-white">

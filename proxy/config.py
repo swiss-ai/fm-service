@@ -17,8 +17,12 @@ class Settings(BaseSettings):
     auth0_api_audience: str
     auth0_issuer: str
     auth0_algorithms: str
+    auth0_client_id: str
+    auth0_client_secret: str
     logfire_token: str
     database_url: str
+    auth_secret: str
+    auth_trust_host: bool = False
     class Config:
         env_file = ".env"
 
@@ -27,16 +31,6 @@ available_endpoints = [
         'url': 'http://140.238.223.116:8092',
         'type': 'ocf',
         'api_key': 'test',
-    },
-    {
-        'url': 'https://generativelanguage.googleapis.com/v1beta/openai',
-        'type': 'openai',
-        'prefix': 'google.com',
-    },
-    {
-        'url': 'https://fmapi.swissai.cscs.ch',
-        'type': 'openai',
-        'prefix': 'swissai.org',
     }
 ]
 
