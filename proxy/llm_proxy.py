@@ -1,6 +1,17 @@
+import json
 import backoff
 from langfuse.openai import openai
 from proxy.protocols import ModelResponse, RetryConstantError, RetryExpoError, UnknownLLMError
+
+def response_generator(response, generation):
+    for chunk in response:
+        data = chunk.to_dict()
+        if data.get("usage", None) is not None:
+            generation.update(usage={
+                "promptTokens": data["usage"]["prompt_tokens"],
+                "completionTokens": data["usage"]["completion_tokens"],
+            })
+        yield f"data: {json.dumps(data)}\n\n"
 
 def handle_llm_exception(e: Exception):
     if isinstance(
@@ -37,7 +48,7 @@ def handle_llm_exception(e: Exception):
     max_value=100,
     factor=1.5,
 )
-async def proxy(endpoint, api_key, **kwargs) -> ModelResponse:
+async def llm_proxy(endpoint, api_key, **kwargs) -> ModelResponse:
     async def _completion():
         try:
             client = openai.AsyncOpenAI(

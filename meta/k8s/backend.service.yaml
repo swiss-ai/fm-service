@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: serving-backend-internal
+  namespace: swiss-ai
+spec:
+  ports:
+  - name: serving-http
+    port: 80
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: serving-backend
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: serving-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: serving-backend
+  minReadySeconds: 25
+  template:
+    metadata:
+      labels:
+        app: serving-backend
+    spec:
+      containers:
+      - name: serving-backend
+        image: ghcr.io/xiaozheyao/serving-backend:dev
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 8080
+        envFrom:
+          - configMapRef:
+              name: serving
+      restartPolicy: Always

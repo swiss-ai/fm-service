@@ -87,10 +87,7 @@ let apiKey = "Loading...";
   // Get the access token from the auth provider
   // This would be set during the login process
   async function getAccessToken() {
-    // In a real application, you would get this from your auth library
-    // For this example, we'll simulate by returning a mock token
-    // Typically this would be stored in localStorage, sessionStorage, or a cookie
-    return "eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIiwiaXNzIjoiaHR0cHM6Ly9yZXNlYXJjaGNvbXB1dGVyLmV1LmF1dGgwLmNvbS8ifQ..5gxWfsEs_Fwrb2dP.SJsFRqZbbmH3kj0Jx8_hGhnYAgW6P6PVMy5x_lf8ncpnR09SOoEi-gmidAzeYpebLLwehCVAR6lCSrs4dP3g-ezRq5zaFc1PWdlazj6hKdaE8QwWRwRA3BhLSfOnS_nEmwUMoH94WMW5A4bflRmtUhFINSgZZWkQ8-T4N2kOGlvBtV9Be46RdHIyoXY0TVF7-u3SXpinwv4e5f7F-pj2-dJqI4N8u7g5w6hHOD8WgqmrZXpLL0YWs4fZsYdTLF7PgrwtecXUGBPBAuOJbqykiRcGvVqFptHtAgeISDgBEcKv-jJrXAS_8ZSSQg.fVYYOICxBCzDWk4ZRT99bw"; // Replace with actual access token retrieval
+    return session.accessToken || '';
   }
   
   // Function to fetch API key from the server using the access token
@@ -117,16 +114,12 @@ let apiKey = "Loading...";
       const accessToken = await getAccessToken();
       
       // Send access token to backend for verification
-      const response = await fetch('http://localhost:8080/api/auth/verify_token', {
-        method: 'POST',
+      const response = await fetch('https://api.swissai.cscs.ch/v1/profile', {
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          accessToken,
-          email: userEmail, // This would be extracted from the token on the backend
-          name: userName    // This would be extracted from the token on the backend
-        }),
+          'Authorization': `Bearer ${accessToken}`,
+        }
       });
       
       if (!response.ok) {
@@ -145,7 +138,7 @@ let apiKey = "Loading...";
       if (pythonApiKey) {
         pythonApiKey.textContent = `import requests
 
-url = "https://api.researchcomputer.com/v1/chat/completions"
+url = "https://api.swissai.cscs.ch/v1/chat/completions"
 headers = {
     "Authorization": "Bearer ${apiKey}",
     "Content-Type": "application/json"

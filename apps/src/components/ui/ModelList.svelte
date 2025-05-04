@@ -7,7 +7,7 @@
     let error = null;
     onMount(async () => {
         try {
-            const response = await fetch("https://api.research.computer/v1/models_detailed");
+            const response = await fetch("https://api.swissai.cscs.ch/v1/models_detailed");
             const data = await response.json();
             models = data.data.map(model => ({
                 data: {

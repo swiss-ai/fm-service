@@ -3,8 +3,6 @@ import { defineConfig } from 'auth-astro';
 import type { JWT } from '@auth/core/jwt';
 import type { Session } from '@auth/core/types';
 
-console.log("Auth0 Client ID:", import.meta.env.AUTH0_CLIENT_ID);
-
 // Define custom types for our extended token and session
 interface ExtendedJWT extends JWT {
   accessToken?: string;
@@ -22,13 +20,17 @@ export default defineConfig({
     Auth0({
       clientId: import.meta.env.AUTH0_CLIENT_ID,
       clientSecret: import.meta.env.AUTH0_CLIENT_SECRET,
-      issuer: process.env.AUTH0_ISSUER
+      issuer: import.meta.env.AUTH0_ISSUER,
+      authorization: {
+        params: {
+          scope: 'openid profile email offline_access',
+        },
+      },
     }),
   ],
   callbacks: {
     async jwt({ token, user, account }) {
       const extToken = token as ExtendedJWT;
-      
       // If we have user and account info (after sign in), add the access token to the token
       if (account && user) {
         return {
@@ -44,8 +46,6 @@ export default defineConfig({
       if (extToken.accessTokenExpires && Date.now() < extToken.accessTokenExpires) {
         return extToken;
       }
-      
-      // Otherwise, return the existing token (refresh token logic would go here if implemented)
       return extToken;
     },
     

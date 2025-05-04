@@ -14,4 +14,3 @@ sqlmodel
 psycopg2-binary
 pyjwt[crypto]
 pydantic-settings
-auth0-python
