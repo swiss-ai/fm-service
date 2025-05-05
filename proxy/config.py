@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     auth_secret: str
     auth_trust_host: bool = False
     ocf_head_addr: str
+    langfuse_host: str
+    langfuse_public_key: str
+    langfuse_secret_key: str
     class Config:
         env_file = ".env"
 
