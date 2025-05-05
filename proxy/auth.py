@@ -5,6 +5,8 @@ import requests
 from datetime import datetime
 from sqlmodel import SQLModel, Field, Session, create_engine, select
 
+known_tokens = set()
+
 class APIKey(SQLModel, table=True):
     key: str = Field(primary_key=True)
     budget: int = Field(default=1000)
@@ -38,17 +40,17 @@ def rotate_key(engine, key: str) -> APIKey:
         session.refresh(api_key)
         return api_key
 
-async def verify_access_token(users, access_token: str) -> APIKey:
-    """
-    Verify an access token and return the associated user profile.
-    """
-    print(f"access_token: {access_token}")
-    try:
-        user = users.userinfo(access_token)
-        return user
-    except Exception as e:
-        traceback.print_exc()
-        raise Exception(f"Invalid access token: {e}")
+def verify_token(engine, token: str) -> APIKey:
+    if token in known_tokens:
+        return True
+    with Session(engine) as session:
+        api_key = session.exec(
+            select(APIKey).where(APIKey.key == token)
+        ).first()
+        if api_key is None:
+            return None
+        known_tokens.add(token)
+        return True
 
 def get_profile_from_accesstoken(access_token: str):
     res = requests.get(
