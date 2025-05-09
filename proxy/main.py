@@ -56,7 +56,7 @@ async def completion(
         )
     
     data = await request.json()
-    data["user_key"] = token
+    data["user_id"] = token
     if 'stream' not in data:
         data['stream'] = False
     if type(data['stream']) == str:
