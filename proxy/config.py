@@ -1,13 +1,9 @@
-from typing import Dict
 from pydantic_settings import BaseSettings
 from functools import lru_cache
 
 @lru_cache()
 def get_settings():
     return Settings()
-
-# Dictionary to store user-submitted provider keys
-provider_keys: Dict[str, Dict[str, str]] = {}
 
 class Settings(BaseSettings):
     auth0_domain: str

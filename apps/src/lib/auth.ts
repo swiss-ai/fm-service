@@ -26,6 +26,29 @@ export function setAccessToken(token: string): void {
  */
 export function clearAccessToken(): void {
   localStorage.removeItem('accessToken');
+  // Also clear the API key when logging out
+  clearApiKey();
+}
+
+/**
+ * Get the stored API key
+ */
+export function getApiKey(): string | null {
+  return localStorage.getItem('apiKey');
+}
+
+/**
+ * Store the API key
+ */
+export function setApiKey(apiKey: string): void {
+  localStorage.setItem('apiKey', apiKey);
+}
+
+/**
+ * Remove the stored API key
+ */
+export function clearApiKey(): void {
+  localStorage.removeItem('apiKey');
 }
 
 /**
@@ -33,19 +56,26 @@ export function clearAccessToken(): void {
  */
 export async function verifyAccessToken(accessToken: string): Promise<any> {
   try {
-    const response = await fetch('/api/auth/verify_token', {
-      method: 'POST',
+    const response = await fetch('https://api.swissai.cscs.ch/v1/profile', {
+      method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ accessToken }),
+        'Authorization': `Bearer ${accessToken}`,
+      }
     });
     
     if (!response.ok) {
       throw new Error(`Error: ${response.status}`);
     }
     
-    return await response.json();
+    const data = await response.json();
+    
+    // Store the API key if it's present in the response
+    if (data.api_key) {
+      setApiKey(data.api_key);
+    }
+    
+    return data;
   } catch (error) {
     console.error('Error verifying access token:', error);
     throw error;
@@ -63,19 +93,26 @@ export async function getUserProfile(): Promise<any> {
   }
   
   try {
-    const response = await fetch('/api/profile', {
-      method: 'POST',
+    const response = await fetch('https://api.swissai.cscs.ch/v1/profile', {
+      method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ accessToken }),
+        'Authorization': `Bearer ${accessToken}`,
+      }
     });
     
     if (!response.ok) {
       throw new Error(`Error: ${response.status}`);
     }
     
-    return await response.json();
+    const data = await response.json();
+    
+    // Store the API key if it's present in the response
+    if (data.api_key) {
+      setApiKey(data.api_key);
+    }
+    
+    return data;
   } catch (error) {
     console.error('Error fetching user profile:', error);
     throw error;

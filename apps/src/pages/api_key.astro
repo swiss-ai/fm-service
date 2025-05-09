@@ -3,6 +3,8 @@ import { getSession } from 'auth-astro/server';
 import PageLayout from "@layouts/PageLayout.astro";
 import Container from "@components/Container.astro";
 import { SITE } from "@consts";
+import { getApiKey, getUserProfile } from '@lib/auth';
+import SignIn from 'auth-astro/components/SignIn.astro';
 
 export const prerender = false;
 
@@ -84,10 +86,14 @@ let apiKey = "Loading...";
 </PageLayout>
 
 <script define:vars={{ session }}>
-  // Get the access token from the auth provider
-  // This would be set during the login process
-  async function getAccessToken() {
-    return session.accessToken || '';
+  // Function to get API key from storage
+  function getApiKey() {
+    return localStorage.getItem('apiKey');
+  }
+  
+  // Function to set API key in storage
+  function setApiKey(apiKey) {
+    localStorage.setItem('apiKey', apiKey);
   }
   
   // Function to fetch API key from the server using the access token
@@ -105,30 +111,45 @@ let apiKey = "Loading...";
       
       if (!userEmail) {
         if (loadingMessage) loadingMessage.classList.add('hidden');
-        if (errorMessage) errorMessage.classList.remove('hidden');
-        if (errorMessage) errorMessage.textContent = "User email not found. Please log out and log in again.";
+        if (errorMessage) {
+          errorMessage.classList.remove('hidden');
+          errorMessage.innerHTML = "User email not found. Please sign in again.";
+          const signInButton = document.createElement('div');
+          signInButton.innerHTML = `<button onclick="window.location.href='/auth/signin'" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition-colors mt-2">Sign In</button>`;
+          errorMessage.appendChild(signInButton);
+        }
         return;
       }
       
-      // Get access token
-      const accessToken = await getAccessToken();
+      // Try to get API key from storage first
+      let apiKey = getApiKey();
       
-      // Send access token to backend for verification
-      const response = await fetch('https://api.swissai.cscs.ch/v1/profile', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
+      // If not in storage, fetch from server
+      if (!apiKey) {
+        const response = await fetch('https://api.swissai.cscs.ch/v1/profile', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.accessToken}`,
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status}`);
         }
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status}`);
+        
+        const data = await response.json();
+        apiKey = data.api_key;
+        
+        // Store the API key if we got one
+        if (apiKey) {
+          setApiKey(apiKey);
+        }
       }
       
-      const data = await response.json();
-      // Extract API key directly from the response
-      const apiKey = data.api_key;
+      if (!apiKey) {
+        throw new Error('No API key available');
+      }
       
       // Update UI with API key
       if (apiKeyDisplay) apiKeyDisplay.value = apiKey;
@@ -162,7 +183,13 @@ print(response.json())`;
       const errorMessage = document.getElementById('errorMessage');
       
       if (loadingMessage) loadingMessage.classList.add('hidden');
-      if (errorMessage) errorMessage.classList.remove('hidden');
+      if (errorMessage) {
+        errorMessage.classList.remove('hidden');
+        errorMessage.innerHTML = "Error loading API key. Please sign in again or refresh the page.";
+        const signInButton = document.createElement('div');
+        signInButton.innerHTML = `<button onclick="window.location.href='/auth/signin'" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition-colors mt-2">Sign In</button>`;
+        errorMessage.appendChild(signInButton);
+      }
     }
   }
   

@@ -45,8 +45,43 @@ export default defineConfig({
       // If token hasn't expired, return it
       if (extToken.accessTokenExpires && Date.now() < extToken.accessTokenExpires) {
         return extToken;
+      } else {
+      // If token has expired, try to refresh it
+      if (extToken.refreshToken) {
+        try {
+          const response = await fetch(`${import.meta.env.AUTH0_ISSUER}/oauth/token`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+              grant_type: 'refresh_token',
+              client_id: import.meta.env.AUTH0_CLIENT_ID,
+              client_secret: import.meta.env.AUTH0_CLIENT_SECRET,
+              refresh_token: extToken.refreshToken,
+            }),
+          });
+
+          const tokens = await response.json();
+
+          if (!response.ok) throw tokens;
+
+          return {
+            ...extToken,
+            accessToken: tokens.access_token,
+            accessTokenExpires: Date.now() + tokens.expires_in * 1000,
+          };
+        } catch (error) {
+          console.error('Error refreshing access token', error);
+          return {
+            ...extToken,
+            error: 'RefreshAccessTokenError',
+          };
+        }
       }
+      // If there's no refresh token, return the token as is
       return extToken;
+      }
     },
     
     async session({ session, token }) {

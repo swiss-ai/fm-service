@@ -1,0 +1,12 @@
+---
+import PageLayout from "@layouts/PageLayout.astro";
+import { SITE, HOME } from "@consts";
+import StatisticsChart from '../components/StatisticsChart.svelte';
+---
+
+<PageLayout title={HOME.TITLE} description={HOME.DESCRIPTION}>
+  <main class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-8">SwissAI Usage Statistics</h1>
+    <StatisticsChart client:load />
+  </main>
+</PageLayout> 

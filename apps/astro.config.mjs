@@ -14,8 +14,6 @@ export default defineConfig({
   integrations: [svelte(), mdx(), sitemap(), tailwind(), auth()],
 
   experimental: {
-    svg: true,
-    session:true,
   },
 
   adapter: node({

@@ -145,7 +145,11 @@ import { SITE } from "../consts";
     
     <!-- API Key handling -->
     <script is:inline>
-      let API_KEY = ""; // Will be set by keys.js if available
+      // Function to get API key from storage
+      function getApiKey() {
+        return localStorage.getItem('apiKey');
+      }
+      let API_KEY = getApiKey() || ""; // Will be set from storage if available
     </script>
   </head>
   <body>

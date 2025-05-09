@@ -12,6 +12,7 @@ from proxy.llm_proxy import llm_proxy, response_generator
 from proxy.config import get_settings
 from proxy.auth import get_profile_from_accesstoken, get_or_create_apikey, verify_token
 from proxy.provider import get_all_models
+from proxy.utils import get_statistics
 
 engine = None
 settings = get_settings()
@@ -55,6 +56,7 @@ async def completion(
         )
     
     data = await request.json()
+    data["user_key"] = token
     if 'stream' not in data:
         data['stream'] = False
     if type(data['stream']) == str:
@@ -100,6 +102,15 @@ async def get_profile(credentials: Annotated[HTTPAuthorizationCredentials, Depen
             status_code=401,
             detail="Invalid access token",
         )
+
+@app.get("/v1/statistics")
+async def get_statistics_endpoint(credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)] = None):
+    if credentials:
+        api_key = credentials.credentials
+    else:
+        api_key = None
+    stats = get_statistics(api_key)
+    return stats
 
 if __name__ == "__main__":
     import uvicorn

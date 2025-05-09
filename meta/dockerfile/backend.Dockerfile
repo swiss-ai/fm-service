@@ -13,4 +13,4 @@ ENV PYTHONPATH=/app
 EXPOSE 8080
 
 # Command to run the application
-ENTRYPOINT ["uvicorn", "proxy.main:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "4"]
+ENTRYPOINT ["uvicorn", "proxy.main:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "16"]
