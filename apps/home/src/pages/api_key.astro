@@ -4,7 +4,7 @@ import PageLayout from "@layouts/PageLayout.astro";
 import Container from "@components/Container.astro";
 import { SITE } from "@consts";
 import { getApiKey, getUserProfile } from '@lib/auth';
-import SignIn from 'auth-astro/components/SignIn.astro';
+import { SignIn } from 'auth-astro/components';
 
 export const prerender = false;
 
@@ -54,7 +54,10 @@ let apiKey = "Loading...";
             Loading your API key...
           </div>
           <div id="errorMessage" class="hidden absolute -bottom-6 left-0 text-red-600 dark:text-red-400 text-sm">
-            Error loading API key. Please refresh and try again.
+            Error loading API key. Please login again.
+            <SignIn provider="auth0" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition-colors">
+            Login
+          </SignIn>
           </div>
         </div>
         
@@ -108,18 +111,6 @@ let apiKey = "Loading...";
       // Get user details from session
       const userEmail = session?.user?.email || '';
       const userName = session?.user?.name || '';
-      
-      if (!userEmail) {
-        if (loadingMessage) loadingMessage.classList.add('hidden');
-        if (errorMessage) {
-          errorMessage.classList.remove('hidden');
-          errorMessage.innerHTML = "User email not found. Please sign in again.";
-          const signInButton = document.createElement('div');
-          signInButton.innerHTML = `<button onclick="window.location.href='/auth/signin'" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition-colors mt-2">Sign In</button>`;
-          errorMessage.appendChild(signInButton);
-        }
-        return;
-      }
       
       // Try to get API key from storage first
       let apiKey = getApiKey();
