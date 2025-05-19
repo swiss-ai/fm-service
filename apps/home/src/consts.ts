@@ -1,7 +1,7 @@
 import type { Site, Metadata } from "@types";
 
 export const SITE: Site = {
-  NAME: "Research Computer",
+  NAME: "Swiss AI Serving",
   EMAIL: "askxzyao@gmail.com",
   NUM_POSTS_ON_HOMEPAGE: 3,
   NUM_WORKS_ON_HOMEPAGE: 2,
@@ -10,7 +10,7 @@ export const SITE: Site = {
 
 export const HOME: Metadata = {
   TITLE: "Home",
-  DESCRIPTION: "Research Computer",
+  DESCRIPTION: "Swiss AI Serving",
 };
 
 export const ARTICLES: Metadata = {

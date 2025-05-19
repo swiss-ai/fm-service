@@ -64,12 +64,13 @@ let apiKey = "Loading...";
         <div class="mt-8">
           <h2 class="text-xl font-semibold text-black dark:text-white mb-3">How to use your API key</h2>
           <div class="space-y-4 text-gray-700 dark:text-gray-300">
-            <p>Include this API key in the header of your requests to the Research Computer API:</p>
+            <p>Include this API key in the header of your requests to the {SITE.NAME} API:</p>
             <div class="bg-gray-200 dark:bg-gray-900 p-3 rounded-md overflow-x-auto">
               <pre><code class="text-sm">Authorization: Bearer <span id="headerApiKey">your-api-key</span></code></pre>
             </div>
-            
-            <p>Example Python request:</p>
+            If you cannot see your API key, please sign out and sign in again to refresh your session.
+
+            <p>The endpoint is compatible with OpenAI protocol. Example Python request:</p>
             <div class="bg-gray-200 dark:bg-gray-900 p-3 rounded-md overflow-x-auto">
               <pre><code class="text-sm" id="pythonApiKey">test</code></pre>
             </div>
@@ -148,22 +149,24 @@ let apiKey = "Loading...";
       
       // Update the Python example
       if (pythonApiKey) {
-        pythonApiKey.textContent = `import requests
+        pythonApiKey.textContent = `import openai
 
-url = "https://api.swissai.cscs.ch/v1/chat/completions"
-headers = {
-    "Authorization": "Bearer ${apiKey}",
-    "Content-Type": "application/json"
-}
-payload = {
-    "model": "mistral-7b",
-    "messages": [
-        {"role": "user", "content": "Hello, how are you?"}
-    ]
-}
+client = openai.Client(api_key="sk-rc-XJqaLep36bF2VddH6srz1w", base_url="https://fmapi.swissai.cscs.ch")
+res = client.chat.completions.create(
+    model="meta-llama/Llama-3.3-70B-Instruct",
+    messages=[
+        {
+            "content": "Who is Pablo Picasso?", 
+            "role": "user",
+        }
+    ],
+    stream=True,
+)
 
-response = requests.post(url, json=payload, headers=headers)
-print(response.json())`;
+for chunk in res:
+    if len(chunk.choices) > 0 and chunk.choices[0].delta.content:
+        print(chunk.choices[0].delta.content, end="", flush=True)
+`;
       }
       
       // Hide loading message
@@ -176,7 +179,7 @@ print(response.json())`;
       if (loadingMessage) loadingMessage.classList.add('hidden');
       if (errorMessage) {
         errorMessage.classList.remove('hidden');
-        errorMessage.innerHTML = "Error loading API key. Please sign in again or refresh the page.";
+        errorMessage.innerHTML = "Error loading API key. Please sign out and sign in again or refresh the page.";
         const signInButton = document.createElement('div');
         signInButton.innerHTML = `<button onclick="window.location.href='/auth/signin'" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition-colors mt-2">Sign In</button>`;
         errorMessage.appendChild(signInButton);

@@ -21,7 +21,14 @@ def get_or_create_apikey(engine, owner_email: str) -> APIKey:
         ).first()
         if api_key is None:
             key = f"sk-rc-{secrets.token_urlsafe(16)}"
-            api_key = APIKey(key=key, owner_email=owner_email)
+            if any([owner_email.lower().endswith(x) for x in [
+                'ethz.ch','cscs.ch','unibas.ch','unibe.ch','uzh.ch',
+                'epfl.ch','unil.ch','unige.ch',
+            ]]):
+                budget = 1000
+            else:
+                budget = -1
+            api_key = APIKey(key=key, owner_email=owner_email, budget=budget)
             session.add(api_key)
             session.commit()
             session.refresh(api_key)
@@ -48,7 +55,9 @@ def verify_token(engine, token: str) -> APIKey:
             select(APIKey).where(APIKey.key == token)
         ).first()
         if api_key is None:
-            return None
+            return False
+        if api_key.budget <= 0:
+            return False
         known_tokens.add(token)
         return True
 

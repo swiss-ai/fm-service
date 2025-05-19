@@ -1,9 +1,12 @@
 import os
 import requests
 from typing import Optional
+from functools import lru_cache
 
 base_endpoint = "https://cloud.langfuse.com/api/public/metrics/daily"
 
+
+@lru_cache()
 def get_statistics(api_key: Optional[str] = None):
     # Parse request body for api_key
     lf_endpoint = base_endpoint

@@ -4,7 +4,9 @@ import Container from "@components/Container.astro";
 import PageLayout from "@layouts/PageLayout.astro";
 import ArrowCard from "@components/ArrowCard.astro";
 import ModelList from "@components/ui/ModelList.svelte";
+import TokenUsageChart from "@components/TokenUsageChart.svelte";
 import Link from "@components/Link.astro";
+import ContributorCard from "@components/ContributorCard.astro";
 import { SITE, HOME } from "@consts";
 import { SignIn, SignOut } from 'auth-astro/components';
 import { getSession } from 'auth-astro/server';
@@ -22,12 +24,33 @@ const articles = (await getCollection("articles"))
 
 const session = await getSession(Astro.request);
 const isSessionValid = session && session.accessToken && session.user;
+
+const contributors = [
+  {
+    name: "Ilia Badanin",
+    role: "Student Engineer",
+    avatar: "https://media.licdn.com/dms/image/v2/D4E03AQFqYhBtxqAAXg/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1719241055758?e=1753315200&v=beta&t=78v5d8kcIW9tkuvoOkFHkOM52samJi3wYO_S4M7ZIVc",
+    url: "https://ch.linkedin.com/in/ilia-badanin"
+  },
+  {
+    name: "Xiaozhe Yao",
+    role: "Project Lead",
+    avatar: "https://avatars.githubusercontent.com/u/10499297?v=4",
+    url: "https://about.yao.sh"
+  },
+  {
+    name: "Imanol Schlag",
+    role: "Project Lead",
+    avatar: "https://ai.ethz.ch/about-us/people/executive-office/_jcr_content/par/twocolumn_687649423/par_left/textimage/image.imageformat.textdouble.1425254353.png",
+    url: "https://ischlag.github.io/about/"
+  }
+];
 ---
 
 <PageLayout title={HOME.TITLE} description={HOME.DESCRIPTION}>
   <Container>
     <h4 class="animate font-semibold text-black dark:text-white">
-      Welcome to Research Computer <span class="text-xl">👋🏻</span> 
+      Welcome to {SITE.NAME} <span class="text-xl">👋🏻</span> 
     </h4>
     
     <div class="my-6 flex flex-col md:flex-row items-start md:items-center gap-4">
@@ -81,6 +104,15 @@ const isSessionValid = session && session.accessToken && session.user;
           <ModelList client:load />
         </div>
       </section>
+
+      <section>
+        <p class="animate dark:text-white">
+          Token Usage Statistics:
+        </p>
+        <div class="animate space-y-4">
+          <TokenUsageChart client:load />
+        </div>
+      </section>
       
       <section class="animate space-y-6">
         <div class="flex flex-wrap gap-y-2 items-center justify-between">
@@ -116,6 +148,19 @@ const isSessionValid = session && session.accessToken && session.user;
             </li>
           ))}
         </ul>
+      </section>
+
+      <section class="animate space-y-6">
+        <div class="flex flex-wrap gap-y-2 items-center justify-between">
+          <h5 class="font-semibold text-black dark:text-white">
+            Contributors
+          </h5>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {contributors.map(contributor => (
+            <ContributorCard {...contributor} />
+          ))}
+        </div>
       </section>
     </div>
   </Container>

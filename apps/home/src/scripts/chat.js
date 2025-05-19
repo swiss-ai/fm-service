@@ -1,6 +1,5 @@
 window.onload = function () {
-  const BASE_URL = "https://fmapi.swissai.cscs.ch"; // OFFLINETEST
-  // const BASE_URL = "https://api.openai.com/v1"; // OFFLINETEST
+  const BASE_URL = "https://api.swissai.cscs.ch"; // OFFLINETEST
 
   // DOM Elements
   const sendBtnElem = document.getElementById("sendBtn");

@@ -17,6 +17,7 @@ from proxy.utils import get_statistics
 engine = None
 settings = get_settings()
 security = HTTPBearer()
+optional_security = HTTPBearer(auto_error=False)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -64,6 +65,7 @@ async def completion(
             data['stream'] = True # convert to boolean
     if data['stream']:
         data['stream_options'] = {"include_usage": True}
+    
     response = llm_proxy(
         endpoint=settings.ocf_head_addr+"/v1/service/llm/v1/",
         api_key=token,
@@ -104,7 +106,12 @@ async def get_profile(credentials: Annotated[HTTPAuthorizationCredentials, Depen
         )
 
 @app.get("/v1/statistics")
-async def get_statistics_endpoint(credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)] = None):
+async def get_statistics_endpoint(
+        credentials: Annotated[
+            HTTPAuthorizationCredentials | None, 
+            Depends(optional_security)
+        ] = None
+    ):
     if credentials:
         api_key = credentials.credentials
     else:

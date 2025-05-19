@@ -20,6 +20,8 @@ class Settings(BaseSettings):
     langfuse_host: str
     langfuse_public_key: str
     langfuse_secret_key: str
+    vite_auth0_client_id: str
+    vite_auth0_domain: str
     class Config:
         env_file = ".env"
 
