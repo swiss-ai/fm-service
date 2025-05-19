@@ -98,6 +98,7 @@ async def get_profile(credentials: Annotated[HTTPAuthorizationCredentials, Depen
         if user_profile:
             api_key = get_or_create_apikey(engine, user_profile['email'])
         user_profile['api_key'] = api_key.key
+        user_profile['budget'] = api_key.budget
         return user_profile
     except Exception as e:
         return HTTPException(

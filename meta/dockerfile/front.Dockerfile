@@ -1,7 +1,7 @@
 FROM node:lts AS runtime
 WORKDIR /app
 
-COPY apps/ .
+COPY apps/home/ .
 COPY .env .
 RUN npm install
 RUN npm run build

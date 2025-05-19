@@ -28,6 +28,9 @@ let apiKey = "Loading...";
       <div class="animate p-6 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-md">
         <div class="mb-4">
           <p class="text-gray-700 dark:text-gray-300 mb-2">Welcome, <span class="font-semibold">{session.user?.name || 'User'}</span>!</p>
+          <div id="accountStatus" class="mb-2">
+            <p class="text-gray-700 dark:text-gray-300">Account Status: <span id="statusText" class="font-semibold">Loading...</span></p>
+          </div>
           <p class="text-gray-700 dark:text-gray-300">Below is your personal API key for accessing Research Computer services:</p>
         </div>
         
@@ -97,7 +100,7 @@ let apiKey = "Loading...";
   
   // Function to set API key in storage
   function setApiKey(apiKey) {
-    localStorage.setItem('apiKey', apiKey);
+    // localStorage.setItem('apiKey', apiKey);
   }
   
   // Function to fetch API key from the server using the access token
@@ -108,6 +111,7 @@ let apiKey = "Loading...";
       const apiKeyDisplay = document.getElementById('apiKeyDisplay');
       const headerApiKey = document.getElementById('headerApiKey');
       const pythonApiKey = document.getElementById('pythonApiKey');
+      const statusText = document.getElementById('statusText');
       
       // Get user details from session
       const userEmail = session?.user?.email || '';
@@ -133,6 +137,17 @@ let apiKey = "Loading...";
         const data = await response.json();
         apiKey = data.api_key;
         
+        // Update account status based on budget
+        if (statusText) {
+          if (data.budget <= 0) {
+            statusText.textContent = 'Inactive';
+            statusText.classList.add('text-red-600', 'dark:text-red-400');
+          } else {
+            statusText.textContent = 'Active';
+            statusText.classList.add('text-green-600', 'dark:text-green-400');
+          }
+        }
+        
         // Store the API key if we got one
         if (apiKey) {
           setApiKey(apiKey);
@@ -151,9 +166,9 @@ let apiKey = "Loading...";
       if (pythonApiKey) {
         pythonApiKey.textContent = `import openai
 
-client = openai.Client(api_key="sk-rc-XJqaLep36bF2VddH6srz1w", base_url="https://fmapi.swissai.cscs.ch")
+client = openai.Client(api_key="[YOUR_API_KEY]", base_url="https://api.swissai.cscs.ch/v1")
 res = client.chat.completions.create(
-    model="meta-llama/Llama-3.3-70B-Instruct",
+    model="[ANY_AVAILBLE_MODEL]",
     messages=[
         {
             "content": "Who is Pablo Picasso?", 
