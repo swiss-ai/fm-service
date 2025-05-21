@@ -7,6 +7,8 @@ import ModelList from "@components/ui/ModelList.svelte";
 import TokenUsageChart from "@components/TokenUsageChart.svelte";
 import Link from "@components/Link.astro";
 import ContributorCard from "@components/ContributorCard.astro";
+import SponsorCard from "@components/SponsorCard.astro";
+import CSCSLogo from "@components/CSCSLogo.astro";
 import { SITE, HOME } from "@consts";
 import { SignIn, SignOut } from 'auth-astro/components';
 import { getSession } from 'auth-astro/server';
@@ -43,6 +45,26 @@ const contributors = [
     role: "Project Lead",
     avatar: "https://ai.ethz.ch/about-us/people/executive-office/_jcr_content/par/twocolumn_687649423/par_left/textimage/image.imageformat.textdouble.1425254353.png",
     url: "https://ischlag.github.io/about/"
+  }
+];
+
+const sponsors = [
+  {
+    name: "CSCS",
+    logo: "/cscs-logo.svg",
+    component: CSCSLogo
+  },
+  {
+    name: "ETH Zurich",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/ETH_Z%C3%BCrich_Logo_black.svg/1200px-ETH_Z%C3%BCrich_Logo_black.svg.png"
+  },
+  {
+    name: "ETHZ AI Center",
+    logo: "https://ai.ethz.ch/_jcr_content/orgbox/image.imageformat.logo.1864120785.png"
+  },
+  {
+    name: "Langfuse",
+    logo: "https://langfuse.com/langfuse_logo.svg"
   }
 ];
 ---
@@ -153,7 +175,7 @@ const contributors = [
       <section class="animate space-y-6">
         <div class="flex flex-wrap gap-y-2 items-center justify-between">
           <h5 class="font-semibold text-black dark:text-white">
-            Contributors
+            Contributors of the Serving Platform
           </h5>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -162,6 +184,23 @@ const contributors = [
           ))}
         </div>
       </section>
+
+      <section class="animate space-y-6">
+        <div class="py-8 sm:py-8">
+          <div class="mx-auto max-w-7xl px-6 lg:px-8">
+            <div class="mx-auto grid max-w-lg grid-cols-4 items-center gap-x-8 gap-y-12 sm:max-w-xl sm:grid-cols-6 sm:gap-x-10 sm:gap-y-14 lg:mx-0 lg:max-w-none lg:grid-cols-5">
+              {sponsors.map(sponsor => (
+                sponsor.component ? (
+                  <sponsor.component class="col-span-2 max-h-12 w-full object-contain lg:col-span-2" width={158} height={48} />
+                ) : (
+                  <SponsorCard {...sponsor} />
+                )
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+      
     </div>
   </Container>
 </PageLayout>

@@ -12,7 +12,7 @@ from proxy.llm_proxy import llm_proxy, response_generator
 from proxy.config import get_settings
 from proxy.auth import get_profile_from_accesstoken, get_or_create_apikey, verify_token
 from proxy.provider import get_all_models
-from proxy.utils import get_statistics
+from proxy.utils import get_statistics, get_ttl_hash
 
 engine = None
 settings = get_settings()
@@ -117,7 +117,7 @@ async def get_statistics_endpoint(
         api_key = credentials.credentials
     else:
         api_key = None
-    stats = get_statistics(api_key)
+    stats = get_statistics(api_key, ttl_hash=get_ttl_hash())
     return stats
 
 if __name__ == "__main__":

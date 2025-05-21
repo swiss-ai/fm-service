@@ -2,12 +2,13 @@ import os
 import requests
 from typing import Optional
 from functools import lru_cache
+import time
 
 base_endpoint = "https://cloud.langfuse.com/api/public/metrics/daily"
 
 
 @lru_cache()
-def get_statistics(api_key: Optional[str] = None):
+def get_statistics(api_key: Optional[str] = None, ttl_hash=None):
     # Parse request body for api_key
     lf_endpoint = base_endpoint
     if api_key is not None:
@@ -31,3 +32,7 @@ def get_statistics(api_key: Optional[str] = None):
     except requests.exceptions.RequestException as err:
         print(f"Error: {err}")
     return data
+
+def get_ttl_hash(seconds=24 * 3600):
+    """Return the same value withing `seconds` time period"""
+    return round(time.time() / seconds)
