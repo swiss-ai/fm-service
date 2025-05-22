@@ -25,7 +25,10 @@ function AppContent() {
       return parsed.map(conv => ({
         ...conv,
         id: conv.id || Date.now().toString() + Math.random().toString(36).substr(2, 9),
-        title: conv.title.replace(/<think>.*?<\/think>/g, '').replace(/\s+/g, ' ').trim()
+        title: conv.title.replace(/<think>.*?<\/think>/g, '').replace(/\s+/g, ' ').trim(),
+        streamingMessage: '', // Add streamingMessage field to each conversation
+        isStreaming: false, // Add isStreaming flag to track streaming state
+        lastMessageId: null // Add lastMessageId to track which message was being streamed
       }))
     }
     return []
@@ -42,12 +45,11 @@ function AppContent() {
     }
   })
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [streamingMessage, setStreamingMessage] = useState('')
   const abortControllerRef = useRef(null)
 
   // Load messages when current conversation changes
   useEffect(() => {
-    if (!isLoading && !streamingMessage) {
+    if (!isLoading) {
       if (currentConversationId) {
         const conversation = conversations.find(c => c.id === currentConversationId)
         if (conversation) {
@@ -57,7 +59,7 @@ function AppContent() {
         setMessages([])
       }
     }
-  }, [currentConversationId, conversations, isLoading, streamingMessage])
+  }, [currentConversationId, conversations, isLoading])
 
   // Save conversations to localStorage whenever they change
   useEffect(() => {
@@ -149,7 +151,18 @@ function AppContent() {
     setMessages(newMessages)
     setInput('')
     setIsLoading(true)
-    setStreamingMessage('')
+
+    // Update conversation with empty streaming message and set streaming state
+    setConversations(prev => prev.map(conv => 
+      conv.id === convId 
+        ? { 
+            ...conv, 
+            streamingMessage: '',
+            isStreaming: true,
+            lastMessageId: Date.now().toString() // Generate a unique ID for this message
+          }
+        : conv
+    ))
 
     // Generate title if this is the first message
     if (messages.length === 0) {
@@ -197,7 +210,10 @@ function AppContent() {
           { 
             id: newId,
             title: generatedTitle,
-            messages: newMessages
+            messages: newMessages,
+            streamingMessage: '',
+            isStreaming: true,
+            lastMessageId: Date.now().toString()
           },
           ...prev
         ])
@@ -249,7 +265,12 @@ function AppContent() {
                   const parsed = JSON.parse(data)
                   const delta = parsed.choices?.[0]?.delta?.content || ''
                   fullText += delta
-                  setStreamingMessage(fullText)
+                  // Only update the conversation's streaming message
+                  setConversations(prev => prev.map(conv => 
+                    conv.id === convId 
+                      ? { ...conv, streamingMessage: fullText }
+                      : conv
+                  ))
                 } catch (error) {
                   console.error('Error parsing streaming data:', error, data);
                 }
@@ -262,15 +283,17 @@ function AppContent() {
       const assistantMessage = { role: 'assistant', content: fullText }
       const updatedMessages = [...newMessages, assistantMessage]
       console.log('Updated messages:', updatedMessages);
-      setStreamingMessage('')
       setMessages(updatedMessages)
 
-      // Update conversation with new messages using local convId
+      // Update conversation with new messages and clear streaming state
       setConversations(prev => prev.map(conv => 
         conv.id === convId 
           ? { 
               ...conv, 
-              messages: updatedMessages
+              messages: updatedMessages,
+              streamingMessage: '',
+              isStreaming: false,
+              lastMessageId: null
             } 
           : conv
       ))
@@ -278,6 +301,17 @@ function AppContent() {
       if (error.name !== 'AbortError') {
         console.error('Error sending message:', error)
       }
+      // Clear streaming state on error
+      setConversations(prev => prev.map(conv => 
+        conv.id === convId 
+          ? { 
+              ...conv, 
+              streamingMessage: '',
+              isStreaming: false,
+              lastMessageId: null
+            } 
+          : conv
+      ))
     } finally {
       setIsLoading(false)
     }
@@ -292,15 +326,130 @@ function AppContent() {
       { 
         id: newId,
         title: t('new'),
-        messages: []
+        messages: [],
+        streamingMessage: '',
+        isStreaming: false,
+        lastMessageId: null
       },
       ...prev
     ])
   }
 
   const handleSelectConversation = (conversationId) => {
+    // If there's an ongoing streaming message, pause it instead of aborting
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+      abortControllerRef.current = null
+    }
     setCurrentConversationId(conversationId)
   }
+
+  // Add new function to resume streaming
+  const resumeStreaming = async (conversationId) => {
+    const conversation = conversations.find(c => c.id === conversationId)
+    if (!conversation || !conversation.isStreaming || !conversation.lastMessageId) return
+
+    setIsLoading(true)
+    try {
+      console.log('Resuming chat completion...');
+      abortControllerRef.current = new AbortController()
+      const response = await fetch('https://api.swissai.cscs.ch/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${swissAIToken}`
+        },
+        body: JSON.stringify({
+          model: selectedModel,
+          messages: conversation.messages,
+          stream: true,
+          temperature: settings.temperature ?? 0.7,
+          top_p: settings.top_p ?? 1,
+          max_tokens: settings.max_tokens || 2048
+        }),
+        signal: abortControllerRef.current.signal
+      })
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Chat completion failed:', response.status, errorText);
+        throw new Error(`Chat completion failed: ${response.status} ${errorText}`);
+      }
+      
+      if (!response.body) throw new Error('No response body')
+      const reader = response.body.getReader()
+      let fullText = ''
+      let done = false
+      while (!done) {
+        const { value, done: doneReading } = await reader.read()
+        done = doneReading
+        if (value) {
+          const chunk = new TextDecoder().decode(value)
+          chunk.split('\n').forEach(line => {
+            if (line.startsWith('data: ')) {
+              const data = line.replace('data: ', '').trim()
+              if (data && data !== '[DONE]') {
+                try {
+                  const parsed = JSON.parse(data)
+                  const delta = parsed.choices?.[0]?.delta?.content || ''
+                  fullText += delta
+                  setConversations(prev => prev.map(conv => 
+                    conv.id === conversationId 
+                      ? { ...conv, streamingMessage: fullText }
+                      : conv
+                  ))
+                } catch (error) {
+                  console.error('Error parsing streaming data:', error, data);
+                }
+              }
+            }
+          })
+        }
+      }
+      console.log('Chat completion finished');
+      const assistantMessage = { role: 'assistant', content: fullText }
+      const updatedMessages = [...conversation.messages, assistantMessage]
+      setMessages(updatedMessages)
+
+      setConversations(prev => prev.map(conv => 
+        conv.id === conversationId 
+          ? { 
+              ...conv, 
+              messages: updatedMessages,
+              streamingMessage: '',
+              isStreaming: false,
+              lastMessageId: null
+            } 
+          : conv
+      ))
+    } catch (error) {
+      if (error.name !== 'AbortError') {
+        console.error('Error resuming message:', error)
+      }
+      setConversations(prev => prev.map(conv => 
+        conv.id === conversationId 
+          ? { 
+              ...conv, 
+              streamingMessage: '',
+              isStreaming: false,
+              lastMessageId: null
+            } 
+          : conv
+      ))
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Add effect to resume streaming when switching back to a streaming conversation
+  useEffect(() => {
+    if (currentConversationId) {
+      const conversation = conversations.find(c => c.id === currentConversationId)
+      if (conversation?.isStreaming) {
+        resumeStreaming(currentConversationId)
+      }
+    }
+  }, [currentConversationId])
 
   const handleExportConversations = () => {
     const data = {
@@ -433,7 +582,7 @@ function AppContent() {
           onInputChange={(e) => setInput(e.target.value)}
           onSend={handleSend}
           isLoading={isLoading}
-          streamingMessage={streamingMessage}
+          streamingMessage={conversations.find(c => c.id === currentConversationId)?.streamingMessage || ''}
           username={user?.name || 'You'}
           modelName={selectedModel || 'Assistant'}
         />

@@ -236,7 +236,8 @@ export default function ChatWindow({
                 className={`px-3 py-2 rounded-lg shadow-sm whitespace-pre-wrap text-left break-words
                   ${message.role === 'user'
                     ? 'bg-primary text-primary-foreground ml-auto' : 'bg-muted'}
-                  max-w-[95%] md:max-w-[80%] ${message.role === 'user' ? 'ml-auto' : 'mr-auto'}
+                  ${message.content.length < 100 ? 'max-w-fit' : 'max-w-[95%] md:max-w-[80%]'} 
+                  ${message.role === 'user' ? 'ml-auto' : 'mr-auto'}
                   text-base md:text-sm
                 `}
               >
@@ -248,7 +249,9 @@ export default function ChatWindow({
           {streamingMessage && (
             <div className="mb-4">
               <div className="text-xs text-muted-foreground mb-1 text-left">{modelName}</div>
-              <div className="px-3 py-2 rounded-lg bg-muted max-w-[95%] md:max-w-[80%] mr-auto text-base md:text-sm whitespace-pre-wrap text-left break-words">
+              <div className={`px-3 py-2 rounded-lg bg-muted 
+                ${streamingMessage.length < 100 ? 'max-w-fit' : 'max-w-[95%] md:max-w-[80%]'} 
+                mr-auto text-base md:text-sm whitespace-pre-wrap text-left break-words`}>
                 {renderMessage(streamingMessage)}
               </div>
             </div>
