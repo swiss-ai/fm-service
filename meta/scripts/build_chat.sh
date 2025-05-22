@@ -1,0 +1,1 @@
+cd apps/agentui && docker build -t ghcr.io/xiaozheyao/chat-front:dev . && docker push ghcr.io/xiaozheyao/chat-front:dev

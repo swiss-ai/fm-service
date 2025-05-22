@@ -128,6 +128,8 @@ function AppContent() {
 
   const handleSend = async (e) => {
     e.preventDefault()
+    // capture current or new conversation ID to avoid stale closure
+    let convId = currentConversationId
     if (!input.trim() || !selectedModel || !swissAIToken) {
       console.log('Cannot send message:', { 
         hasInput: !!input.trim(), 
@@ -190,6 +192,8 @@ function AppContent() {
         // Create new conversation with cleaned title
         const newId = Date.now().toString()
         setCurrentConversationId(newId)
+        // update local convId to new ID
+        convId = newId
         setConversations(prev => [
           { 
             id: newId,
@@ -258,16 +262,17 @@ function AppContent() {
       console.log('Chat completion finished');
       const assistantMessage = { role: 'assistant', content: fullText }
       const updatedMessages = [...newMessages, assistantMessage]
-      setMessages(updatedMessages)
+      console.log('Updated messages:', updatedMessages);
       setStreamingMessage('')
+      setMessages(updatedMessages)
 
-      // Update conversation with new messages
+      // Update conversation with new messages using local convId
       setConversations(prev => prev.map(conv => 
-        conv.id === currentConversationId 
+        conv.id === convId 
           ? { 
               ...conv, 
               messages: updatedMessages
-            }
+            } 
           : conv
       ))
     } catch (error) {
