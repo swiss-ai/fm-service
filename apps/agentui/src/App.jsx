@@ -35,9 +35,8 @@ function AppContent() {
     return savedId || null
   })
   const [settings, setSettings] = useState(() => {
-    const savedSettings = localStorage.getItem('settings')
-    return savedSettings ? JSON.parse(savedSettings) : {
-      temperature: 0.7,
+    return {
+      temperature: 0.1,
       top_p: 1,
       max_tokens: 2048
     }
