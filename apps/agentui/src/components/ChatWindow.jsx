@@ -220,11 +220,11 @@ export default function ChatWindow({
           {messages.length === 0 && !streamingMessage && (
             <div className="flex flex-1 flex-col items-center justify-center text-muted-foreground text-lg md:text-base py-10 select-none">
               <span className="material-icons mb-2 text-4xl text-accent">chat_bubble_outline</span>
-              <div>{t('startConversation') || 'Start a conversation...'}</div>
+              <div className="hidden md:block">{t('startConversation') || 'Start a conversation...'}</div>
             </div>
           )}
           {messages.map((message, index) => (
-            <div key={index} className="mb-4">
+            <div key={index} className="mb-4 py-2">
               <div 
                 className={`text-xs text-muted-foreground mb-1 ${
                   message.role === 'user' ? 'text-right' : 'text-left'
@@ -235,13 +235,33 @@ export default function ChatWindow({
               <div
                 className={`px-3 py-2 rounded-lg shadow-sm whitespace-pre-wrap text-left break-words
                   ${message.role === 'user'
-                    ? 'bg-primary text-primary-foreground ml-auto' : 'bg-muted'}
+                    ? 'bg-primary text-primary-foreground ml-auto' 
+                    : message.isToolCall 
+                      ? 'bg-yellow-100 dark:bg-yellow-900 text-yellow-900 dark:text-yellow-100' 
+                      : message.isFinalMessage
+                        ? 'bg-green-100 dark:bg-green-900 text-green-900 dark:text-green-100'
+                        : 'bg-muted'}
                   ${message.content.length < 100 ? 'max-w-fit' : 'max-w-[95%] md:max-w-[80%]'} 
                   ${message.role === 'user' ? 'ml-auto' : 'mr-auto'}
                   text-base md:text-sm
                 `}
               >
-                {renderMessage(message.content)}
+                {message.isToolCall && message.isCollapsed ? (
+                  <div className="flex items-center gap-2">
+                    <button 
+                      onClick={() => {
+                        const messages = document.querySelectorAll('.tool-call-message')
+                        messages.forEach(msg => msg.classList.toggle('hidden'))
+                      }}
+                      className="text-xs text-muted-foreground hover:text-foreground"
+                    >
+                      <span className="material-icons text-sm">expand_more</span>
+                      Show tool calls
+                    </button>
+                  </div>
+                ) : (
+                  renderMessage(message.content)
+                )}
               </div>
             </div>
           ))}
@@ -249,10 +269,21 @@ export default function ChatWindow({
           {streamingMessage && (
             <div className="mb-4">
               <div className="text-xs text-muted-foreground mb-1 text-left">{modelName}</div>
-              <div className={`px-3 py-2 rounded-lg bg-muted 
+              <div className={`px-3 py-2 rounded-lg bg-muted/50 
                 ${streamingMessage.length < 100 ? 'max-w-fit' : 'max-w-[95%] md:max-w-[80%]'} 
-                mr-auto text-base md:text-sm whitespace-pre-wrap text-left break-words`}>
-                {renderMessage(streamingMessage)}
+                mr-auto text-base md:text-sm whitespace-pre-wrap text-left break-words font-mono text-xs`}>
+                {streamingMessage.split('\n').map((line, i) => (
+                  <div key={i} className="py-0.5 flex items-center gap-2">
+                    {line.includes('⏳ Waiting for result') ? (
+                      <>
+                        <span className="animate-pulse">⏳</span>
+                        <span>Waiting for result...</span>
+                      </>
+                    ) : (
+                      line
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
           )}

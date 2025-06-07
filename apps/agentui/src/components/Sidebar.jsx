@@ -28,12 +28,16 @@ export default function Sidebar({
   return (
     <>
       {/* Mobile Drawer Overlay */}
-      <div className={`fixed inset-0 z-40 bg-black/40 transition-opacity md:hidden ${open ? 'block' : 'hidden'}`} onClick={onClose} />
+      <div 
+        className={`fixed inset-0 z-40 bg-black/40 transition-opacity md:hidden ${open ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} 
+        onClick={onClose}
+        aria-hidden="true"
+      />
       {/* Sidebar Drawer */}
       <aside
         className={`fixed top-0 left-0 z-50 h-full w-full max-w-xs bg-background border-r flex flex-col transition-transform duration-300 ease-in-out
           ${open ? 'translate-x-0' : '-translate-x-full'}
-          md:static md:translate-x-0 md:w-64 md:max-w-none md:z-40`}
+          md:translate-x-0 md:static md:w-64 md:max-w-none md:z-40`}
         style={{ boxShadow: open ? '0 0 24px rgba(0,0,0,0.12)' : undefined }}
       >
         {/* App Logo and Name */}
@@ -86,7 +90,6 @@ export default function Sidebar({
           )}
         </div>
         {/* Spacer */}
-        <div className="flex-1" />
         {/* User Profile Section */}
         <div className="p-4 border-t border-t-muted-foreground/10">
           <UserProfileDropdown user={user} onLogout={onLogout} onExport={onExport} onImport={onImport} onClearAllConversations={onClearAllConversations} />

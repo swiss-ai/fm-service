@@ -17,6 +17,7 @@ function AppContent() {
   const [models, setModels] = useState([])
   const [selectedModel, setSelectedModel] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [isRequestInProgress, setIsRequestInProgress] = useState(false)
   const [conversations, setConversations] = useState(() => {
     const savedConversations = localStorage.getItem('conversations')
     if (savedConversations) {
@@ -44,7 +45,9 @@ function AppContent() {
       max_tokens: 2048
     }
   })
+  const [isAgentMode, setIsAgentMode] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
   const abortControllerRef = useRef(null)
 
   // Load messages when current conversation changes
@@ -127,13 +130,244 @@ function AppContent() {
     }
   }, [authLoading, swissAIToken])
 
+  // Add new function to handle agent mode requests
+  const handleAgentRequest = async (input, convId) => {
+    const userMessage = { role: 'user', content: input }
+    const newMessages = [...messages, userMessage]
+    setMessages(newMessages)
+    setInput('')
+    setIsLoading(true)
+    setIsRequestInProgress(true)
+
+    // Update conversation with empty streaming message and set streaming state
+    setConversations(prev => prev.map(conv => 
+      conv.id === convId 
+        ? { 
+            ...conv, 
+            streamingMessage: '',
+            isStreaming: true,
+            lastMessageId: Date.now().toString()
+          }
+        : conv
+    ))
+
+    try {
+      console.log('Starting agent request...');
+      abortControllerRef.current = new AbortController()
+      const response = await fetch('http://localhost:8001/v1/responses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+          id: `agent_request_${Date.now()}`,
+          module: "vagents.contrib.modules.chat:AgentChat",
+          input: input,
+          stream: true,
+          additional: { round_limit: 2 }
+        }),
+        signal: abortControllerRef.current.signal
+      })
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Agent request failed:', response.status, errorText);
+        throw new Error(`Agent request failed: ${response.status} ${errorText}`);
+      }
+      
+      if (!response.body) throw new Error('No response body')
+      const reader = response.body.getReader()
+      let currentChunk = ''
+      let updatedMessages = [...newMessages]
+      let toolCalls = [] // Array to collect tool calls
+      let finalMessage = '' // Store the final message
+      let lastToolCall = null // Track the last tool call
+      let done = false
+      while (!done) {
+        const { value, done: doneReading } = await reader.read()
+        done = doneReading
+        if (value) {
+          const chunk = new TextDecoder().decode(value)
+          console.log('Raw chunk received:', chunk)
+          currentChunk += chunk
+          
+          // Format the raw chunk for display
+          let formattedChunk = ''
+          try {
+            const parsedChunk = JSON.parse(chunk)
+            if (parsedChunk.type === 'tool_call') {
+              lastToolCall = parsedChunk.name
+              formattedChunk = `🛠️ Calling: ${parsedChunk.name}\n⏳ Waiting for result...`
+            } else if (parsedChunk.type === 'tool_result') {
+              const result = parsedChunk.result
+              // Truncate long results
+              const truncatedResult = result.length > 200 ? result.substring(0, 200) + '...' : result
+              formattedChunk = `✅ Result from ${parsedChunk.name}:\n${truncatedResult}`
+              lastToolCall = null
+            } else if (parsedChunk.type === 'data') {
+              formattedChunk = parsedChunk.content
+            } else {
+              formattedChunk = JSON.stringify(parsedChunk, null, 2)
+            }
+          } catch (e) {
+            formattedChunk = chunk
+          }
+          
+          // Update streaming message with formatted chunk
+          setConversations(prev => prev.map(conv => 
+            conv.id === convId 
+              ? { 
+                  ...conv, 
+                  streamingMessage: formattedChunk,
+                  waitingForTool: lastToolCall // Add flag to indicate waiting state
+                }
+              : conv
+          ))
+          
+          // Check if we have a complete chunk (ends with newline)
+          if (currentChunk.includes('\n')) {
+            const chunks = currentChunk.split('\n')
+            // Process all complete chunks except the last one (which might be incomplete)
+            for (let i = 0; i < chunks.length - 1; i++) {
+              const chunkText = chunks[i].trim()
+              if (chunkText) {
+                try {
+                  const parsedChunk = JSON.parse(chunkText)
+                  if (parsedChunk.type === 'tool_call' || parsedChunk.type === 'tool_result') {
+                    toolCalls.push(parsedChunk)
+                  } else if (parsedChunk.type === 'data') {
+                    finalMessage = parsedChunk.content
+                  }
+                } catch (e) {
+                  console.error('Error parsing chunk:', e)
+                }
+              }
+            }
+            // Keep the last (potentially incomplete) chunk for next iteration
+            currentChunk = chunks[chunks.length - 1]
+          }
+        }
+      }
+      
+      // Handle any remaining text
+      if (currentChunk.trim()) {
+        try {
+          const parsedChunk = JSON.parse(currentChunk.trim())
+          if (parsedChunk.type === 'tool_call' || parsedChunk.type === 'tool_result') {
+            toolCalls.push(parsedChunk)
+          } else if (parsedChunk.type === 'data') {
+            finalMessage = parsedChunk.content
+          }
+        } catch (e) {
+          console.error('Error parsing final chunk:', e)
+        }
+      }
+
+      // Add tool calls as a single message if there are any
+      if (toolCalls.length > 0) {
+        const toolCallsText = toolCalls.map(call => {
+          if (call.type === 'tool_call') {
+            return `🛠️ Calling: ${call.name}`
+          } else {
+            const result = call.result
+            const truncatedResult = result.length > 200 ? result.substring(0, 200) + '...' : result
+            return `✅ Result from ${call.name}:\n${truncatedResult}`
+          }
+        }).join('\n\n')
+        
+        updatedMessages = [...updatedMessages, { 
+          role: 'assistant', 
+          content: toolCallsText,
+          isToolCall: true,
+          isCollapsed: true // Add flag to indicate this message can be collapsed
+        }]
+        setMessages(updatedMessages)
+      }
+
+      // Add final message if there is one
+      if (finalMessage) {
+        updatedMessages = [...updatedMessages, { 
+          role: 'assistant', 
+          content: finalMessage,
+          isFinalMessage: true // Add flag to identify the final message
+        }]
+        setMessages(updatedMessages)
+      }
+
+      console.log('Agent request finished');
+      setConversations(prev => prev.map(conv => 
+        conv.id === convId 
+          ? { 
+              ...conv, 
+              messages: updatedMessages,
+              streamingMessage: '',
+              isStreaming: false,
+              lastMessageId: null,
+              waitingForTool: null
+            } 
+          : conv
+      ))
+    } catch (error) {
+      if (error.name !== 'AbortError') {
+        console.error('Error in agent request:', error)
+      }
+      setConversations(prev => prev.map(conv => 
+        conv.id === convId 
+          ? { 
+              ...conv, 
+              streamingMessage: '',
+              isStreaming: false,
+              lastMessageId: null,
+              waitingForTool: null
+            } 
+          : conv
+      ))
+    } finally {
+      setIsLoading(false)
+      setIsRequestInProgress(false)
+    }
+  }
+
   const handleSend = async (e) => {
     e.preventDefault()
+    if (isRequestInProgress) return
+    
     // capture current or new conversation ID to avoid stale closure
     let convId = currentConversationId
-    if (!input.trim() || !selectedModel || !swissAIToken) {
+    if (!input.trim()) {
+      console.log('Cannot send message: No input');
+      return;
+    }
+
+    // Create new conversation if this is the first message
+    if (messages.length === 0) {
+      const newId = Date.now().toString()
+      setCurrentConversationId(newId)
+      // update local convId to new ID
+      convId = newId
+      setConversations(prev => [
+        { 
+          id: newId,
+          title: t('new'),
+          messages: [],
+          streamingMessage: '',
+          isStreaming: false,
+          lastMessageId: null
+        },
+        ...prev
+      ])
+    }
+
+    // Handle agent mode differently
+    if (isAgentMode) {
+      await handleAgentRequest(input, convId)
+      return
+    }
+    
+    // Regular chat mode handling
+    if (!selectedModel || !swissAIToken) {
       console.log('Cannot send message:', { 
-        hasInput: !!input.trim(), 
         hasModel: !!selectedModel, 
         hasToken: !!swissAIToken 
       });
@@ -151,6 +385,7 @@ function AppContent() {
     setMessages(newMessages)
     setInput('')
     setIsLoading(true)
+    setIsRequestInProgress(true)
 
     // Update conversation with empty streaming message and set streaming state
     setConversations(prev => prev.map(conv => 
@@ -159,15 +394,18 @@ function AppContent() {
             ...conv, 
             streamingMessage: '',
             isStreaming: true,
-            lastMessageId: Date.now().toString() // Generate a unique ID for this message
+            lastMessageId: Date.now().toString()
           }
         : conv
     ))
 
-    // Generate title if this is the first message
-    if (messages.length === 0) {
-      try {
-        console.log('Generating title...');
+    try {
+      console.log('Starting chat completion...');
+      abortControllerRef.current = new AbortController()
+
+      // If this is the first message, generate a title first
+      let title = ''
+      if (messages.length === 0) {
         const titleResponse = await fetch('https://api.swissai.cscs.ch/v1/chat/completions', {
           method: 'POST',
           headers: {
@@ -179,52 +417,27 @@ function AppContent() {
             messages: [
               {
                 role: 'system',
-                content: 'Generate a short, concise title (max 5 words) for this conversation based on the user\'s message. Return only the title, nothing else./no_think'
+                content: 'Generate a short, concise title (max 5 words) for this conversation based on the user\'s first message. The title should capture the main topic or purpose of the conversation. Respond with ONLY the title, no additional text.'
               },
               userMessage
             ],
             temperature: 0.7,
-            max_tokens: 100
+            max_tokens: 50
           })
         })
-        
-        if (!titleResponse.ok) {
-          const errorText = await titleResponse.text();
-          console.error('Title generation failed:', titleResponse.status, errorText);
-          throw new Error(`Title generation failed: ${titleResponse.status} ${errorText}`);
-        }
-        
-        const titleData = await titleResponse.json()
-        console.log('Title generated:', titleData);
-        const generatedTitle = titleData.choices[0].message.content.trim()
-          .replace(/<think>.*?<\/think>/g, '') // Remove think tags and their content
-          .replace(/\s+/g, ' ') // Replace multiple spaces with single space
-          .trim() // Remove leading/trailing spaces
-        
-        // Create new conversation with cleaned title
-        const newId = Date.now().toString()
-        setCurrentConversationId(newId)
-        // update local convId to new ID
-        convId = newId
-        setConversations(prev => [
-          { 
-            id: newId,
-            title: generatedTitle,
-            messages: newMessages,
-            streamingMessage: '',
-            isStreaming: true,
-            lastMessageId: Date.now().toString()
-          },
-          ...prev
-        ])
-      } catch (error) {
-        console.error('Error generating title:', error)
-      }
-    }
 
-    try {
-      console.log('Starting chat completion...');
-      abortControllerRef.current = new AbortController()
+        if (titleResponse.ok) {
+          const titleData = await titleResponse.json()
+          title = titleData.choices[0].message.content.trim()
+          // Update the conversation title
+          setConversations(prev => prev.map(conv => 
+            conv.id === convId 
+              ? { ...conv, title }
+              : conv
+          ))
+        }
+      }
+
       const response = await fetch('https://api.swissai.cscs.ch/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -265,10 +478,11 @@ function AppContent() {
                   const parsed = JSON.parse(data)
                   const delta = parsed.choices?.[0]?.delta?.content || ''
                   fullText += delta
+                  
                   // Only update the conversation's streaming message
                   setConversations(prev => prev.map(conv => 
                     conv.id === convId 
-                      ? { ...conv, streamingMessage: fullText }
+                      ? { ...conv, streamingMessage: fullText.replace(/<title>.*?<\/title>/, '') }
                       : conv
                   ))
                 } catch (error) {
@@ -280,7 +494,7 @@ function AppContent() {
         }
       }
       console.log('Chat completion finished');
-      const assistantMessage = { role: 'assistant', content: fullText }
+      const assistantMessage = { role: 'assistant', content: fullText.replace(/<title>.*?<\/title>/, '') }
       const updatedMessages = [...newMessages, assistantMessage]
       console.log('Updated messages:', updatedMessages);
       setMessages(updatedMessages)
@@ -314,6 +528,7 @@ function AppContent() {
       ))
     } finally {
       setIsLoading(false)
+      setIsRequestInProgress(false)
     }
   }
 
@@ -344,12 +559,15 @@ function AppContent() {
     setCurrentConversationId(conversationId)
   }
 
-  // Add new function to resume streaming
+  // Modify the resumeStreaming function to prevent concurrent requests
   const resumeStreaming = async (conversationId) => {
+    if (isRequestInProgress) return
+    
     const conversation = conversations.find(c => c.id === conversationId)
     if (!conversation || !conversation.isStreaming || !conversation.lastMessageId) return
 
     setIsLoading(true)
+    setIsRequestInProgress(true)
     try {
       console.log('Resuming chat completion...');
       abortControllerRef.current = new AbortController()
@@ -438,18 +656,19 @@ function AppContent() {
       ))
     } finally {
       setIsLoading(false)
+      setIsRequestInProgress(false)
     }
   }
 
-  // Add effect to resume streaming when switching back to a streaming conversation
+  // Modify the effect to prevent concurrent requests
   useEffect(() => {
-    if (currentConversationId) {
+    if (currentConversationId && !isRequestInProgress) {
       const conversation = conversations.find(c => c.id === currentConversationId)
       if (conversation?.isStreaming) {
         resumeStreaming(currentConversationId)
       }
     }
-  }, [currentConversationId])
+  }, [currentConversationId, isRequestInProgress])
 
   const handleExportConversations = () => {
     const data = {
@@ -524,9 +743,27 @@ function AppContent() {
 
   // Header for mobile
   const Header = () => (
-    <div className="md:hidden flex items-center justify-between p-2 border-b bg-background sticky top-0 z-20">
-      <button onClick={() => setSidebarOpen(true)} className="p-2"><span className="material-icons">menu</span></button>
-      <span className="font-bold text-lg">Chat</span>
+    <div className="md:hidden fixed top-0 left-0 right-0 flex items-center justify-between p-4 border-b bg-background z-50 shadow-sm">
+      <button 
+        onClick={() => setSidebarOpen(true)} 
+        className="p-2 hover:bg-muted rounded-full transition-colors"
+        aria-label="Open menu"
+      >
+        <span className="material-icons">menu</span>
+      </button>
+      <div className="flex flex-col items-center">
+        <span className="font-semibold text-lg">SwissAI Chat</span>
+        {selectedModel && (
+          <span className="text-xs text-muted-foreground">{selectedModel}</span>
+        )}
+      </div>
+      <button 
+        onClick={() => setSettingsOpen(true)} 
+        className="p-2 hover:bg-muted rounded-full transition-colors"
+        aria-label="Open settings"
+      >
+        <span className="material-icons">settings</span>
+      </button>
     </div>
   )
 
@@ -575,7 +812,7 @@ function AppContent() {
         onLogout={logout}
         user={user}
       />
-      <div className="flex-1 flex flex-col min-h-0 transition-all duration-200">
+      <div className="flex-1 flex flex-col min-h-0 transition-all duration-200 md:mt-0 mt-16">
         <ChatWindow
           messages={messages}
           input={input}
@@ -587,9 +824,10 @@ function AppContent() {
           modelName={selectedModel || 'Assistant'}
         />
       </div>
-      <div className="w-80 flex-shrink-0 h-full">
+      <div className="hidden md:block">
         <SettingsPanel
           open={true}
+          onClose={() => setSettingsOpen(false)}
           settings={settings}
           onChange={setSettings}
           models={models}
@@ -597,6 +835,23 @@ function AppContent() {
           onModelChange={(e) => setSelectedModel(e.target.value)}
           onLanguageChange={handleLanguageChange}
           currentLanguage={i18n.language}
+          isAgentMode={isAgentMode}
+          onModeChange={setIsAgentMode}
+        />
+      </div>
+      <div className="md:hidden">
+        <SettingsPanel
+          open={settingsOpen}
+          onClose={() => setSettingsOpen(false)}
+          settings={settings}
+          onChange={setSettings}
+          models={models}
+          selectedModel={selectedModel}
+          onModelChange={(e) => setSelectedModel(e.target.value)}
+          onLanguageChange={handleLanguageChange}
+          currentLanguage={i18n.language}
+          isAgentMode={isAgentMode}
+          onModeChange={setIsAgentMode}
         />
       </div>
     </div>

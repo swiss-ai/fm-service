@@ -26,5 +26,8 @@
   "loginPrompt": "Please log in to continue",
   "login": "Log In",
   "logout": "Log Out",
-  "actions": "Actions"
+  "actions": "Actions",
+  "mode": "Mode",
+  "chatMode": "Chat",
+  "agentMode": "Agent"
 } 

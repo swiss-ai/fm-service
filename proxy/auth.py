@@ -23,7 +23,7 @@ def get_or_create_apikey(engine, owner_email: str) -> APIKey:
             key = f"sk-rc-{secrets.token_urlsafe(16)}"
             if any([owner_email.lower().endswith(x) for x in [
                 'ethz.ch','cscs.ch','unibas.ch','unibe.ch','uzh.ch',
-                'epfl.ch','unil.ch','unige.ch',
+                'epfl.ch','unil.ch','unige.ch','hevs.ch',
             ]]):
                 budget = 1000
             else:

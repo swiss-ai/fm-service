@@ -44,7 +44,7 @@ if os.getenv("LOGFIRE_TOKEN", None):
     logfire.instrument_fastapi(app, capture_headers=True)
 
 @app.post("/v1/chat/completions")
-async def completion(
+async def chat_completion(
         request: Request, 
         credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
     ):
@@ -63,6 +63,37 @@ async def completion(
     if type(data['stream']) == str:
         if data['stream'].lower() == "true":
             data['stream'] = True # convert to boolean
+    if data['stream']:
+        data['stream_options'] = {"include_usage": True}
+    
+    response = llm_proxy(
+        endpoint=settings.ocf_head_addr+"/v1/service/llm/v1/",
+        api_key=token,
+        **data,
+    )
+    if 'stream' in data and data['stream'] == True:
+        return StreamingResponse(response_generator(response, response.generation), media_type='text/event-stream')
+    return response
+
+@app.post("/v1/completions")
+async def completion(
+        request: Request, 
+        credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
+    ):
+    token = credentials.credentials
+    
+    if not verify_token(engine, token):
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid access token",
+        )
+    data = await request.json()
+    data["user_id"] = token
+    if 'stream' not in data:
+        data['stream'] = False
+    if type(data['stream']) == str:
+        if data['stream'].lower() == "true":
+            data['stream'] = True
     if data['stream']:
         data['stream_options'] = {"include_usage": True}
     

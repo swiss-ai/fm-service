@@ -20,5 +20,8 @@
   "clearAll": "Tout effacer",
   "deleteConversationConfirm": "Êtes-vous sûr de vouloir supprimer cette conversation ?",
   "clearAllConversationsConfirm": "Êtes-vous sûr de vouloir supprimer toutes les conversations ? Cette action ne peut pas être annulée.",
-  "actions": "Actions"
+  "actions": "Actions",
+  "mode": "Mode",
+  "chatMode": "Chat",
+  "agentMode": "Agent"
 } 
