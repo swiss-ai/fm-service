@@ -1,0 +1,82 @@
+{
+  "gpt-4.1": {
+    "gpt-4.1": 0.0,
+    "swissai/apertus3-70b-4T-sft": 781.0,
+    "swissai/apertus3-70b-iter_304250": 776.0,
+    "swissai/apertus3-70b-iter_90000": 784.5,
+    "swissai/apertus3-8b-6.3T-sft": 792.5,
+    "swissai/apertus3-8b-iter_90000": 787.5,
+    "claude-3-5-sonnet-20241022": 641.0,
+    "gemini-1.5-flash-8b": 597.5
+  },
+  "swissai/apertus3-70b-4T-sft": {
+    "gpt-4.1": 24.0,
+    "swissai/apertus3-70b-4T-sft": 0.0,
+    "swissai/apertus3-70b-iter_304250": 435.5,
+    "swissai/apertus3-70b-iter_90000": 483.0,
+    "swissai/apertus3-8b-6.3T-sft": 539.5,
+    "swissai/apertus3-8b-iter_90000": 559.0,
+    "claude-3-5-sonnet-20241022": 139.5,
+    "gemini-1.5-flash-8b": 138.5
+  },
+  "swissai/apertus3-70b-iter_304250": {
+    "gpt-4.1": 29.0,
+    "swissai/apertus3-70b-4T-sft": 369.5,
+    "swissai/apertus3-70b-iter_304250": 0.0,
+    "swissai/apertus3-70b-iter_90000": 462.0,
+    "swissai/apertus3-8b-6.3T-sft": 537.0,
+    "swissai/apertus3-8b-iter_90000": 546.5,
+    "claude-3-5-sonnet-20241022": 124.0,
+    "gemini-1.5-flash-8b": 131.0
+  },
+  "swissai/apertus3-70b-iter_90000": {
+    "gpt-4.1": 20.5,
+    "swissai/apertus3-70b-4T-sft": 322.0,
+    "swissai/apertus3-70b-iter_304250": 343.0,
+    "swissai/apertus3-70b-iter_90000": 0.0,
+    "swissai/apertus3-8b-6.3T-sft": 486.0,
+    "swissai/apertus3-8b-iter_90000": 499.5,
+    "claude-3-5-sonnet-20241022": 116.5,
+    "gemini-1.5-flash-8b": 116.5
+  },
+  "swissai/apertus3-8b-6.3T-sft": {
+    "gpt-4.1": 12.5,
+    "swissai/apertus3-70b-4T-sft": 265.5,
+    "swissai/apertus3-70b-iter_304250": 268.0,
+    "swissai/apertus3-70b-iter_90000": 319.0,
+    "swissai/apertus3-8b-6.3T-sft": 0.0,
+    "swissai/apertus3-8b-iter_90000": 437.0,
+    "claude-3-5-sonnet-20241022": 87.0,
+    "gemini-1.5-flash-8b": 92.5
+  },
+  "swissai/apertus3-8b-iter_90000": {
+    "gpt-4.1": 17.5,
+    "swissai/apertus3-70b-4T-sft": 246.0,
+    "swissai/apertus3-70b-iter_304250": 258.5,
+    "swissai/apertus3-70b-iter_90000": 305.5,
+    "swissai/apertus3-8b-6.3T-sft": 368.0,
+    "swissai/apertus3-8b-iter_90000": 0.0,
+    "claude-3-5-sonnet-20241022": 83.5,
+    "gemini-1.5-flash-8b": 88.5
+  },
+  "claude-3-5-sonnet-20241022": {
+    "gpt-4.1": 164.0,
+    "swissai/apertus3-70b-4T-sft": 665.5,
+    "swissai/apertus3-70b-iter_304250": 681.0,
+    "swissai/apertus3-70b-iter_90000": 688.5,
+    "swissai/apertus3-8b-6.3T-sft": 718.0,
+    "swissai/apertus3-8b-iter_90000": 721.5,
+    "claude-3-5-sonnet-20241022": 0.0,
+    "gemini-1.5-flash-8b": 416.5
+  },
+  "gemini-1.5-flash-8b": {
+    "gpt-4.1": 207.5,
+    "swissai/apertus3-70b-4T-sft": 666.5,
+    "swissai/apertus3-70b-iter_304250": 674.0,
+    "swissai/apertus3-70b-iter_90000": 688.5,
+    "swissai/apertus3-8b-6.3T-sft": 712.5,
+    "swissai/apertus3-8b-iter_90000": 716.5,
+    "claude-3-5-sonnet-20241022": 388.5,
+    "gemini-1.5-flash-8b": 0.0
+  }
+}

@@ -26,10 +26,7 @@ function AppContent() {
       return parsed.map(conv => ({
         ...conv,
         id: conv.id || Date.now().toString() + Math.random().toString(36).substr(2, 9),
-        title: conv.title.replace(/<think>.*?<\/think>/g, '').replace(/\s+/g, ' ').trim(),
-        streamingMessage: '', // Add streamingMessage field to each conversation
-        isStreaming: false, // Add isStreaming flag to track streaming state
-        lastMessageId: null // Add lastMessageId to track which message was being streamed
+        title: conv.title.replace(/<think>.*?<\/think>/g, '').replace(/\s+/g, ' ').trim()
       }))
     }
     return []
@@ -39,8 +36,9 @@ function AppContent() {
     return savedId || null
   })
   const [settings, setSettings] = useState(() => {
-    return {
-      temperature: 0.1,
+    const savedSettings = localStorage.getItem('settings')
+    return savedSettings ? JSON.parse(savedSettings) : {
+      temperature: 0.7,
       top_p: 1,
       max_tokens: 2048
     }
@@ -52,7 +50,7 @@ function AppContent() {
 
   // Load messages when current conversation changes
   useEffect(() => {
-    if (!isLoading) {
+    if (!isLoading && !streamingMessage) {
       if (currentConversationId) {
         const conversation = conversations.find(c => c.id === currentConversationId)
         if (conversation) {
@@ -62,7 +60,7 @@ function AppContent() {
         setMessages([])
       }
     }
-  }, [currentConversationId, conversations, isLoading])
+  }, [currentConversationId, conversations, isLoading, streamingMessage])
 
   // Save conversations to localStorage whenever they change
   useEffect(() => {
@@ -334,7 +332,6 @@ function AppContent() {
     if (isRequestInProgress) return
     
     // capture current or new conversation ID to avoid stale closure
-    let convId = currentConversationId
     if (!input.trim()) {
       console.log('Cannot send message: No input');
       return;
@@ -367,10 +364,6 @@ function AppContent() {
     
     // Regular chat mode handling
     if (!selectedModel || !swissAIToken) {
-      console.log('Cannot send message:', { 
-        hasModel: !!selectedModel, 
-        hasToken: !!swissAIToken 
-      });
       return;
     }
     
@@ -496,36 +489,22 @@ function AppContent() {
       console.log('Chat completion finished');
       const assistantMessage = { role: 'assistant', content: fullText.replace(/<title>.*?<\/title>/, '') }
       const updatedMessages = [...newMessages, assistantMessage]
-      console.log('Updated messages:', updatedMessages);
       setMessages(updatedMessages)
+      setStreamingMessage('')
 
-      // Update conversation with new messages and clear streaming state
+      // Update conversation with new messages
       setConversations(prev => prev.map(conv => 
-        conv.id === convId 
+        conv.id === currentConversationId 
           ? { 
               ...conv, 
-              messages: updatedMessages,
-              streamingMessage: '',
-              isStreaming: false,
-              lastMessageId: null
-            } 
+              messages: updatedMessages
+            }
           : conv
       ))
     } catch (error) {
       if (error.name !== 'AbortError') {
         console.error('Error sending message:', error)
       }
-      // Clear streaming state on error
-      setConversations(prev => prev.map(conv => 
-        conv.id === convId 
-          ? { 
-              ...conv, 
-              streamingMessage: '',
-              isStreaming: false,
-              lastMessageId: null
-            } 
-          : conv
-      ))
     } finally {
       setIsLoading(false)
       setIsRequestInProgress(false)
@@ -541,21 +520,13 @@ function AppContent() {
       { 
         id: newId,
         title: t('new'),
-        messages: [],
-        streamingMessage: '',
-        isStreaming: false,
-        lastMessageId: null
+        messages: []
       },
       ...prev
     ])
   }
 
   const handleSelectConversation = (conversationId) => {
-    // If there's an ongoing streaming message, pause it instead of aborting
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort()
-      abortControllerRef.current = null
-    }
     setCurrentConversationId(conversationId)
   }
 
@@ -819,7 +790,7 @@ function AppContent() {
           onInputChange={(e) => setInput(e.target.value)}
           onSend={handleSend}
           isLoading={isLoading}
-          streamingMessage={conversations.find(c => c.id === currentConversationId)?.streamingMessage || ''}
+          streamingMessage={streamingMessage}
           username={user?.name || 'You'}
           modelName={selectedModel || 'Assistant'}
         />
