@@ -1,0 +1,79 @@
+---
+import Container from "@components/Container.astro";
+import PageLayout from "@layouts/PageLayout.astro";
+import ArenaNav from "@components/ArenaNav.astro";
+import { SITE } from "@consts";
+
+export const prerender = false;
+---
+
+<PageLayout title="LLM Arena Vote" description="Vote on model comparisons in the LLM Arena">
+  <Container>
+    <div class="space-y-8">
+      <header class="animate text-center">
+        <h1 class="text-4xl font-bold text-black dark:text-white mb-2">
+          LLM Arena <span class="text-3xl">🏆</span>
+        </h1>
+        <p class="text-gray-700 dark:text-gray-300 text-lg">
+          Explore rankings and head-to-head performance comparisons of large language models based on human evaluations.
+        </p>
+      </header>
+
+      <div class="animate text-center">
+        <h2 class="text-2xl font-semibold text-black dark:text-white mb-4">
+          Vote
+        </h2>
+        <p class="text-gray-600 dark:text-gray-400">
+          Vote on model comparisons to help improve the rankings.
+        </p>
+      </div>
+
+      <ArenaNav currentPage="vote" />
+
+      <section class="animate">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-8">
+          <div class="text-center">
+            <div class="mb-6">
+              <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto">
+                <svg class="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+            </div>
+            
+            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              Voting Coming Soon
+            </h3>
+            
+            <p class="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
+              The voting interface is under development. This will allow you to evaluate model responses 
+              and contribute to the arena rankings.
+            </p>
+            
+            <div class="space-y-4 text-left max-w-lg mx-auto">
+              <h4 class="font-semibold text-gray-900 dark:text-white">Planned Features:</h4>
+              <ul class="space-y-2 text-gray-600 dark:text-gray-400">
+                <li class="flex items-start space-x-2">
+                  <span class="text-blue-500 mt-1">•</span>
+                  <span>Side-by-side model response comparisons</span>
+                </li>
+                <li class="flex items-start space-x-2">
+                  <span class="text-blue-500 mt-1">•</span>
+                  <span>Blind evaluation to reduce bias</span>
+                </li>
+                <li class="flex items-start space-x-2">
+                  <span class="text-blue-500 mt-1">•</span>
+                  <span>Various prompt categories and difficulty levels</span>
+                </li>
+                <li class="flex items-start space-x-2">
+                  <span class="text-blue-500 mt-1">•</span>
+                  <span>Real-time ELO rating updates</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </Container>
+</PageLayout> 

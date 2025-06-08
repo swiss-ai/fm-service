@@ -1,0 +1,43 @@
+---
+import Container from "@components/Container.astro";
+import PageLayout from "@layouts/PageLayout.astro";
+import ArenaNav from "@components/ArenaNav.astro";
+import ArenaDetails from "@components/ArenaDetails.svelte";
+import { SITE } from "@consts";
+
+// Import the original data
+import elosData from "../../data/arena/elos.json";
+import detailsData from "../../data/arena/details.json";
+
+export const prerender = false;
+---
+
+<PageLayout title="LLM Arena Details" description="Detailed comparison views and head-to-head model evaluations">
+  <Container>
+    <div class="space-y-8">
+      <header class="animate text-center">
+        <h1 class="text-4xl font-bold text-black dark:text-white mb-2">
+          LLM Arena <span class="text-3xl">🏆</span>
+        </h1>
+        <p class="text-gray-700 dark:text-gray-300 text-lg">
+          Explore rankings and head-to-head performance comparisons of large language models based on human evaluations.
+        </p>
+      </header>
+
+      <div class="animate text-center">
+        <h2 class="text-2xl font-semibold text-black dark:text-white mb-4">
+          Details
+        </h2>
+        <p class="text-gray-600 dark:text-gray-400">
+          Detailed comparison views with actual prompts, responses, and evaluation reasoning.
+        </p>
+      </div>
+
+      <ArenaNav currentPage="details" />
+
+      <section class="animate">
+        <ArenaDetails elosData={elosData} detailsData={detailsData} client:load />
+      </section>
+    </div>
+  </Container>
+</PageLayout> 
