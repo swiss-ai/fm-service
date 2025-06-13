@@ -59,7 +59,7 @@
   async function loadDetailsData() {
     try {
       dataLoading = true;
-      const response = await fetch('/src/data/arena/details.json');
+      const response = await fetch('/data/arena/details.json');
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
