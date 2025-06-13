@@ -1,19 +1,18 @@
 ---
-import Container from "@components/Container.astro";
+import WideContainer from "@components/WideContainer.astro";
 import PageLayout from "@layouts/PageLayout.astro";
 import ArenaNav from "@components/ArenaNav.astro";
 import ArenaDetails from "@components/ArenaDetails.svelte";
 import { SITE } from "@consts";
 
-// Import the original data
+// Import only the ELO data at build time, details will be loaded client-side
 import elosData from "../../data/arena/elos.json";
-import detailsData from "../../data/arena/details.json";
 
 export const prerender = false;
 ---
 
 <PageLayout title="LLM Arena Details" description="Detailed comparison views and head-to-head model evaluations">
-  <Container>
+  <WideContainer>
     <div class="space-y-8">
       <header class="animate text-center">
         <h1 class="text-4xl font-bold text-black dark:text-white mb-2">
@@ -36,8 +35,8 @@ export const prerender = false;
       <ArenaNav currentPage="details" />
 
       <section class="animate">
-        <ArenaDetails elosData={elosData} detailsData={detailsData} client:load />
+        <ArenaDetails elosData={elosData} client:load />
       </section>
     </div>
-  </Container>
+  </WideContainer>
 </PageLayout> 

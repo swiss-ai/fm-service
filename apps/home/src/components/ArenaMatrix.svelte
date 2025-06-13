@@ -7,6 +7,7 @@
   let models = [];
   let matrix = [];
   let hoveredCell = null;
+  let containerRef;
   
   $: {
     if (matrixData && Object.keys(matrixData).length > 0) {
@@ -23,35 +24,18 @@
     }
   }
   
-  function getCellColor(winRate) {
-    if (winRate === 0.5) return 'bg-gray-100 dark:bg-gray-700'; // Diagonal
+  function getCellColorStyle(winRate) {
+    if (winRate === 0.5) return 'background-color: rgb(156 163 175 / 0.3)'; // Diagonal - gray
     
-    // Create a more sophisticated color scale
     const intensity = Math.abs(winRate - 0.5) * 2; // 0 to 1
     
     if (winRate > 0.5) {
-      // Green for wins (higher win rate)
-      const opacity = Math.round(intensity * 9); // 1-9 for Tailwind opacity scale
-      return `bg-green-${Math.max(1, Math.min(9, opacity * 100))} bg-opacity-${Math.max(10, Math.min(90, opacity * 10))}`;
-    } else {
-      // Red for losses (lower win rate)
-      const opacity = Math.round(intensity * 9);
-      return `bg-red-${Math.max(1, Math.min(9, opacity * 100))} bg-opacity-${Math.max(10, Math.min(90, opacity * 10))}`;
-    }
-  }
-  
-  function getCellColorStyle(winRate) {
-    if (winRate === 0.5) return 'background-color: rgb(107 114 128 / 0.1)'; // Diagonal
-    
-    const intensity = Math.abs(winRate - 0.5) * 2;
-    
-    if (winRate > 0.5) {
       // Green gradient for wins
-      const alpha = 0.2 + (intensity * 0.6); // 0.2 to 0.8
+      const alpha = 0.3 + (intensity * 0.7); // 0.3 to 1.0
       return `background-color: rgba(34, 197, 94, ${alpha})`;
     } else {
       // Red gradient for losses  
-      const alpha = 0.2 + (intensity * 0.6);
+      const alpha = 0.3 + (intensity * 0.7);
       return `background-color: rgba(239, 68, 68, ${alpha})`;
     }
   }
@@ -71,20 +55,94 @@
     // Remove '-responses' suffix and clean up names
     return modelName.replace('-responses', '').replace(/apertus3-/, '');
   }
+
+  function handleMouseMove(event, i, j, model1, model2) {
+    hoveredCell = {
+      i, j, model1, model2, 
+      winRate: matrix[i][j], 
+      totalGames: getTotalGames(model1, model2),
+      x: event.clientX + 10,
+      y: event.clientY - 10
+    };
+  }
+
+  function handleMouseLeave() {
+    hoveredCell = null;
+  }
 </script>
 
-<div class="overflow-x-auto">
+<style>
+  .matrix-table {
+    border-collapse: separate;
+    border-spacing: 2px;
+  }
+  
+  .matrix-cell {
+    width: 60px;
+    height: 48px;
+    text-align: center;
+    vertical-align: middle;
+    font-weight: bold;
+    font-size: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  
+  .matrix-cell:hover {
+    transform: scale(1.1);
+    z-index: 10;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+  
+  .row-header {
+    text-align: right;
+    padding-right: 12px;
+    font-weight: 500;
+    font-size: 0.75rem;
+    width: 140px;
+    max-width: 140px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .col-header {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    padding: 8px 4px;
+    font-weight: 500;
+    font-size: 0.75rem;
+    width: 60px;
+    height: 120px;
+    vertical-align: bottom;
+    text-align: center;
+  }
+  
+  :global(.dark) .matrix-cell {
+    border-color: #4b5563;
+    color: #f9fafb;
+  }
+  
+  :global(.dark) .row-header,
+  :global(.dark) .col-header {
+    color: #d1d5db;
+  }
+</style>
+
+<div class="space-y-6">
   {#if models.length > 0}
-    <div class="min-w-max">
-      <table class="w-full border-collapse">
+    <!-- Heatmap Table -->
+    <div class="relative overflow-x-auto bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
+      <table class="matrix-table">
         <thead>
           <tr>
-            <th class="p-2 text-xs font-medium text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700"></th>
+            <th class="w-36"></th>
             {#each models as model}
-              <th class="p-2 text-xs font-medium text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 max-w-32 overflow-hidden">
-                <div class="transform -rotate-45 origin-left whitespace-nowrap text-left" style="transform-origin: left bottom;">
-                  {getDisplayName(model)}
-                </div>
+              <th class="col-header text-gray-700 dark:text-gray-300">
+                {getDisplayName(model)}
               </th>
             {/each}
           </tr>
@@ -92,19 +150,19 @@
         <tbody>
           {#each models as model1, i}
             <tr>
-              <td class="p-2 text-xs font-medium text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700 max-w-32 overflow-hidden text-right">
+              <td class="row-header text-gray-700 dark:text-gray-300">
                 {getDisplayName(model1)}
               </td>
               {#each models as model2, j}
                 <td 
-                  class="relative p-0 border border-gray-200 dark:border-gray-700 w-12 h-12 cursor-pointer transition-all duration-200 hover:scale-110 hover:z-10 hover:shadow-lg"
+                  class="matrix-cell text-gray-800 dark:text-gray-100"
                   style={getCellColorStyle(matrix[i][j])}
-                  on:mouseenter={() => hoveredCell = {i, j, model1, model2, winRate: matrix[i][j], totalGames: getTotalGames(model1, model2)}}
-                  on:mouseleave={() => hoveredCell = null}
+                  on:mousemove={(e) => handleMouseMove(e, i, j, model1, model2)}
+                  on:mouseleave={handleMouseLeave}
+                  role="button"
+                  tabindex="0"
                 >
-                  <div class="flex items-center justify-center h-full text-xs font-semibold text-gray-800 dark:text-gray-200">
-                    {formatPercentage(matrix[i][j])}
-                  </div>
+                  {formatPercentage(matrix[i][j])}
                 </td>
               {/each}
             </tr>
@@ -114,22 +172,45 @@
     </div>
 
     <!-- Legend -->
-    <div class="mt-4 flex items-center justify-center space-x-6 text-sm text-gray-600 dark:text-gray-400">
+    <div class="flex items-center justify-center space-x-8 text-sm text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
       <div class="flex items-center space-x-2">
-        <div class="w-4 h-4 rounded" style="background-color: rgba(34, 197, 94, 0.6)"></div>
+        <div class="w-6 h-6 rounded border border-gray-300" style="background-color: rgba(34, 197, 94, 0.8)"></div>
         <span>Higher Win Rate</span>
       </div>
       <div class="flex items-center space-x-2">
-        <div class="w-4 h-4 rounded bg-gray-200 dark:bg-gray-600"></div>
+        <div class="w-6 h-6 rounded border border-gray-300" style="background-color: rgb(156 163 175 / 0.3)"></div>
         <span>Same Model</span>
       </div>
       <div class="flex items-center space-x-2">
-        <div class="w-4 h-4 rounded" style="background-color: rgba(239, 68, 68, 0.6)"></div>
+        <div class="w-6 h-6 rounded border border-gray-300" style="background-color: rgba(239, 68, 68, 0.8)"></div>
         <span>Lower Win Rate</span>
       </div>
     </div>
+
+    <!-- Statistics -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+        <div class="text-2xl font-bold text-gray-900 dark:text-white">{models.length}</div>
+        <div class="text-sm text-gray-600 dark:text-gray-400">Models Compared</div>
+      </div>
+      <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+        <div class="text-2xl font-bold text-gray-900 dark:text-white">
+          {Object.values(matrixData).reduce((total, modelData) => 
+            total + Object.values(modelData).reduce((sum, wins) => sum + wins, 0), 0
+          )}
+        </div>
+        <div class="text-sm text-gray-600 dark:text-gray-400">Total Comparisons</div>
+      </div>
+      <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+        <div class="text-2xl font-bold text-gray-900 dark:text-white">
+          {Math.round(models.length * (models.length - 1) / 2)}
+        </div>
+        <div class="text-sm text-gray-600 dark:text-gray-400">Unique Matchups</div>
+      </div>
+    </div>
   {:else}
-    <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+    <div class="text-center py-12 text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+      <div class="animate-spin w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
       Loading matrix data...
     </div>
   {/if}
@@ -137,10 +218,10 @@
 
 <!-- Tooltip -->
 {#if hoveredCell}
-  <div class="fixed z-50 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg shadow-lg pointer-events-none"
-       style="left: {hoveredCell.x || 0}px; top: {hoveredCell.y || 0}px;">
-    <div class="font-semibold">{getDisplayName(hoveredCell.model1)} vs {getDisplayName(hoveredCell.model2)}</div>
-    <div>Win Rate: {formatPercentage(hoveredCell.winRate)}</div>
-    <div>Total Games: {hoveredCell.totalGames}</div>
+  <div class="fixed z-50 px-4 py-3 bg-gray-900 text-white text-sm rounded-lg shadow-xl pointer-events-none max-w-xs"
+       style="left: {hoveredCell.x}px; top: {hoveredCell.y}px;">
+    <div class="font-semibold mb-1">{getDisplayName(hoveredCell.model1)} vs {getDisplayName(hoveredCell.model2)}</div>
+    <div class="text-gray-300">Win Rate: <span class="text-white font-medium">{formatPercentage(hoveredCell.winRate)}</span></div>
+    <div class="text-gray-300">Total Games: <span class="text-white font-medium">{hoveredCell.totalGames}</span></div>
   </div>
-{/if} 
+{/if}
