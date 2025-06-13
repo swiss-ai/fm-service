@@ -27,26 +27,35 @@ const years = Object.keys(posts).sort((a, b) => parseInt(b) - parseInt(a));
 
 <PageLayout title={DOCS.TITLE} description={DOCS.DESCRIPTION}>
   <Container>
-    <div class="space-y-10">
-      <div class="animate font-semibold text-black dark:text-white">
-        Docs
+    <div class="space-y-16">
+      <!-- Header Section -->
+      <div class="text-center">
+        <h1 class="animate text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-4">
+          Documentation
+        </h1>
+        <p class="animate text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+          Comprehensive guides and tutorials to help you get started with our platform
+        </p>
       </div>
-      <div class="space-y-4">
+      
+      <!-- Content Section -->
+      <div class="space-y-12">
         {years.map(year => (
-          <section class="animate space-y-4">
-            <div class="font-semibold text-black dark:text-white">
-              {year}
+          <section class="animate space-y-8">
+            <div class="flex items-center gap-4">
+              <h2 class="text-3xl font-bold text-slate-900 dark:text-slate-100">
+                {year}
+              </h2>
+              <div class="flex-1 h-px bg-gradient-to-r from-slate-300 to-transparent dark:from-slate-600"></div>
             </div>
-            <div>
-              <ul class="flex flex-col gap-4">
-                {
-                  posts[year].map((post) => (
-                    <li>
-                      <ArrowCard entry={post}/>
-                    </li>
-                  ))
-                }
-              </ul>
+            <div class="grid gap-6">
+              {
+                posts[year].map((post) => (
+                  <div class="animate">
+                    <ArrowCard entry={post}/>
+                  </div>
+                ))
+              }
             </div>
           </section>
         ))}

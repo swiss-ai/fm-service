@@ -77,145 +77,194 @@ const sponsors = [
 
 <PageLayout title={HOME.TITLE} description={HOME.DESCRIPTION}>
   <Container>
-    <h4 class="animate font-semibold text-black dark:text-white">
-      Welcome to {SITE.NAME} <span class="text-xl">👋🏻</span> 
-    </h4>
+    <!-- Hero Section -->
+    <div class="text-center mb-16">
+      <h1 class="animate text-5xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-6">
+        Welcome to {SITE.NAME}
+      </h1>
+      <p class="animate text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto leading-relaxed">
+        A research platform for serving foundation models in a decentralized, cost-efficient way
+      </p>
+    </div>
     
-    <div class="my-6 flex flex-col md:flex-row items-start md:items-center gap-4">
+    <!-- Authentication Section -->
+    <div class="animate mb-12">
       {isSessionValid ? (
-        <div class="w-full flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div class="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
-            <p class="text-sm text-gray-600 dark:text-gray-400">Logged in as</p>
-            <p class="font-medium text-black dark:text-white">{session.user?.name || 'User'}</p>
-          </div>
-          <div class="flex gap-3">
-            <a href="/api_key" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded transition-colors">
-              View API Key
-            </a>
-            <SignOut class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded transition-colors">
-              Logout
-            </SignOut>
+        <div class="card-modern p-8 rounded-2xl">
+          <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full flex items-center justify-center">
+                <i class="fas fa-user text-white text-lg"></i>
+              </div>
+              <div>
+                <p class="text-sm font-medium text-slate-600 dark:text-slate-400">Logged in as</p>
+                <p class="text-xl font-bold text-slate-900 dark:text-slate-100">{session.user?.name || 'User'}</p>
+              </div>
+            </div>
+            <div class="flex gap-4">
+              <a href="/api_key" class="btn-accent py-3 px-6 rounded-lg font-semibold">
+                <i class="fas fa-key mr-2"></i>
+                View API Key
+              </a>
+              <SignOut class="bg-slate-500 hover:bg-slate-600 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 hover:-translate-y-0.5 shadow-lg">
+                <i class="fas fa-sign-out-alt mr-2"></i>
+                Logout
+              </SignOut>
+            </div>
           </div>
         </div>
       ) : (
-        <div class="w-full flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <p class="text-gray-700 dark:text-gray-300">
-            Sign in to get your API key and access our LLM services.
-          </p>
-          <SignIn provider="auth0" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition-colors">
-            Login
-          </SignIn>
+        <div class="card-modern p-8 rounded-2xl">
+          <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-center">
+                <i class="fas fa-lock text-white text-lg"></i>
+              </div>
+              <div>
+                <p class="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">Get Started</p>
+                <p class="text-slate-600 dark:text-slate-400">
+                  Sign in to get your API key and access our LLM services.
+                </p>
+              </div>
+            </div>
+            <SignIn provider="auth0" class="btn-primary py-3 px-8 rounded-lg font-semibold">
+              <i class="fas fa-sign-in-alt mr-2"></i>
+              Login
+            </SignIn>
+          </div>
         </div>
       )}
     </div>
     
-    <div class="mt-8 flex flex-col sm:flex-row gap-4">
+    <!-- Action Buttons -->
+    <div class="animate flex flex-col sm:flex-row gap-6 mb-20 justify-center">
       <a href="https://chat.swissai.cscs.ch" target="_blank" rel="noopener noreferrer"
-         class="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-200">
-        <i class="fas fa-comments"></i>
+         class="btn-primary py-4 px-8 rounded-xl font-semibold text-lg flex items-center justify-center gap-3 min-w-[200px]">
+        <i class="fas fa-comments text-xl"></i>
         Swiss AI Chat
       </a>
       <a href="/arena/" target="_blank" rel="noopener noreferrer"
-         class="flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-medium py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-200">
-        <i class="fas fa-trophy"></i>
+         class="btn-secondary py-4 px-8 rounded-xl font-semibold text-lg flex items-center justify-center gap-3 min-w-[200px]">
+        <i class="fas fa-trophy text-xl"></i>
         LM Arena
       </a>
     </div>
 
-    <div class="space-y-16">
-      <section>
-        <article class="space-y-4">
-          <p class="animate dark:text-white">
-            {SITE.NAME} is based on Research Computer, which is a research platform for serving foundation models in a decentralized, cost-efficient way.
-          </p>
-          <p class="animate dark:text-white">
-            By using the platform, you agree to the following terms and conditions:
-            <ul class="animate dark:text-white">
-              <li>You allow us to collect metadata of your requests, including but not limited to token length, timestamp, requested models, etc, for research purpose and to improve the service.</li>
-            </ul>
-          </p>
-        </article>
+    <div class="space-y-24">
+      <!-- About Section -->
+      <section class="animate">
+        <div class="card-modern p-8 rounded-2xl">
+          <div class="max-w-4xl mx-auto text-center space-y-6">
+            <h2 class="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-6">About Our Platform</h2>
+            <p class="text-lg text-slate-700 dark:text-slate-300 leading-relaxed">
+              {SITE.NAME} is based on Research Computer, which is a research platform for serving foundation models in a decentralized, cost-efficient way.
+            </p>
+            <div class="bg-blue-50 dark:bg-slate-800 p-6 rounded-xl border-l-4 border-blue-500">
+              <h3 class="font-semibold text-slate-900 dark:text-slate-100 mb-3">Terms and Conditions</h3>
+              <p class="text-slate-700 dark:text-slate-300">
+                By using the platform, you agree to allow us to collect metadata of your requests, including but not limited to token length, timestamp, requested models, etc, for research purpose and to improve the service.
+              </p>
+            </div>
+          </div>
+        </div>
       </section>
       
-      <section>
-        <p class="animate dark:text-white">
-          Models currently available on the platform:
-        </p>
-        <div class="animate space-y-4">
+      <!-- Models Section -->
+      <section class="animate">
+        <div class="text-center mb-12">
+          <h2 class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-4">Available Models</h2>
+          <p class="text-xl text-slate-600 dark:text-slate-400">Models currently available on the platform</p>
+        </div>
+        <div class="card-modern p-8 rounded-2xl">
           <ModelList client:load />
         </div>
       </section>
 
-      <section>
-        <p class="animate dark:text-white">
-          Token Usage Statistics:
-        </p>
-        <div class="animate space-y-4">
+      <!-- Statistics Section -->
+      <section class="animate">
+        <div class="text-center mb-12">
+          <h2 class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-4">Usage Statistics</h2>
+          <p class="text-xl text-slate-600 dark:text-slate-400">Real-time token usage across our platform</p>
+        </div>
+        <div class="card-modern p-8 rounded-2xl">
           <TokenUsageChart client:load />
         </div>
       </section>
       
-      <section class="animate space-y-6">
-        <div class="flex flex-wrap gap-y-2 items-center justify-between">
-          <h5 class="font-semibold text-black dark:text-white">
-            Documentation
-          </h5>
-          <Link href="/guides">
-            See all docs
+      <!-- Documentation Section -->
+      <section class="animate space-y-8">
+        <div class="flex flex-wrap gap-y-4 items-center justify-between">
+          <div>
+            <h2 class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-2">Documentation</h2>
+            <p class="text-xl text-slate-600 dark:text-slate-400">Comprehensive guides to get you started</p>
+          </div>
+          <Link href="/guides" class="btn-primary py-3 px-6 rounded-lg font-semibold">
+            View All Docs
           </Link>
         </div>
-        <ul class="flex flex-col gap-4">
+        <div class="grid gap-6">
           {docs.map(post => (
-            <li>
+            <div class="animate">
               <ArrowCard entry={post} />
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       </section>
 
-      <section class="animate space-y-6">
-        <div class="flex flex-wrap gap-y-2 items-center justify-between">
-          <h5 class="font-semibold text-black dark:text-white">
-            Research Articles
-          </h5>
-          <Link href="/articles">
-            See all posts
+      <!-- Research Articles Section -->
+      <section class="animate space-y-8">
+        <div class="flex flex-wrap gap-y-4 items-center justify-between">
+          <div>
+            <h2 class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-2">Research Articles</h2>
+            <p class="text-xl text-slate-600 dark:text-slate-400">Latest research and insights</p>
+          </div>
+          <Link href="/articles" class="btn-primary py-3 px-6 rounded-lg font-semibold">
+            View All Articles
           </Link>
         </div>
-        <ul class="flex flex-col gap-4">
+        <div class="grid gap-6">
           {articles.map(article => (
-            <li>
+            <div class="animate">
               <ArrowCard entry={article} />
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section class="animate space-y-6">
-        <div class="flex flex-wrap gap-y-2 items-center justify-between">
-          <h5 class="font-semibold text-black dark:text-white">
-            Contributors of the Serving Platform
-          </h5>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {contributors.map(contributor => (
-            <ContributorCard {...contributor} />
-          ))}
-        </div>
-      </section>
-
-      <section class="animate space-y-6">
-        <div class="py-8 sm:py-8">
-          <div class="mx-auto max-w-7xl px-6 lg:px-8">
-            <div class="mx-auto grid max-w-lg grid-cols-4 items-center gap-x-8 gap-y-12 sm:max-w-xl sm:grid-cols-6 sm:gap-x-10 sm:gap-y-14 lg:mx-0 lg:max-w-none lg:grid-cols-5">
-              {sponsors.map(sponsor => (
-                sponsor.component ? (
-                  <sponsor.component class="col-span-2 max-h-12 w-full object-contain lg:col-span-2" width={158} height={48} />
-                ) : (
-                  <SponsorCard {...sponsor} />
-                )
-              ))}
             </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- Contributors Section -->
+      <section class="animate space-y-8">
+        <div class="text-center mb-12">
+          <h2 class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-4">Our Team</h2>
+          <p class="text-xl text-slate-600 dark:text-slate-400">Meet the contributors behind the serving platform</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {contributors.map(contributor => (
+            <div class="animate">
+              <ContributorCard {...contributor} />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- Sponsors Section -->
+      <section class="animate space-y-8">
+        <div class="text-center mb-12">
+          <h2 class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-4">Our Partners</h2>
+          <p class="text-xl text-slate-600 dark:text-slate-400">Proudly supported by leading institutions</p>
+        </div>
+        <div class="card-modern p-12 rounded-2xl">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-12 items-center justify-items-center">
+            {sponsors.map(sponsor => (
+              sponsor.component ? (
+                <div class="animate opacity-70 hover:opacity-100 transition-opacity duration-300">
+                  <sponsor.component class="max-h-16 w-auto object-contain" width={158} height={64} />
+                </div>
+              ) : (
+                <div class="animate opacity-70 hover:opacity-100 transition-opacity duration-300">
+                  <SponsorCard {...sponsor} />
+                </div>
+              )
+            ))}
           </div>
         </div>
       </section>

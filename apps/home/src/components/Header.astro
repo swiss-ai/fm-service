@@ -6,20 +6,20 @@ import { SITE } from "@consts";
 
 <header>
   <Container>
-    <div class="flex flex-wrap gap-y-2 justify-between">
+    <div class="flex flex-wrap gap-y-4 justify-between items-center">
       <Link href="/" underline={false}>
-        <div class="font-semibold">
+        <div class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
           {SITE.NAME}
         </div>
       </Link>
-      <nav class="flex gap-1">
-        <Link href="/guides">
-          Docs
+      <nav class="flex items-center gap-6">
+        <Link href="/guides" class="text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors duration-200">
+          Documentation
         </Link>
-        <span>
-          {`/`}
+        <span class="text-slate-400 dark:text-slate-500">
+          {`|`}
         </span>
-        <Link href="/articles">
+        <Link href="/articles" class="text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors duration-200">
           Research
         </Link>
       </nav>
