@@ -22,70 +22,116 @@ let apiKey = "Loading...";
 
 <PageLayout title="API Key" description="Your personal API key for accessing Research Computer services">
   <Container>
-    <div class="space-y-8 py-8">
-      <h1 class="animate text-3xl font-bold text-black dark:text-white">Your API Key</h1>
+    <div class="space-y-12 py-8">
+      <!-- Header Section -->
+      <div class="animate text-center">
+        <h1 class="text-4xl md:text-5xl font-bold gradient-text mb-4">
+          Your API Key
+        </h1>
+        <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+          Access Swiss AI Platform services with your personal API key
+        </p>
+      </div>
       
-      <div class="animate p-6 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-md">
-        <div class="mb-4">
-          <p class="text-gray-700 dark:text-gray-300 mb-2">Welcome, <span class="font-semibold">{session.user?.name || 'User'}</span>!</p>
-          <div id="accountStatus" class="mb-2">
-            <p class="text-gray-700 dark:text-gray-300">Account Status: <span id="statusText" class="font-semibold">Loading...</span></p>
+      <!-- Main API Key Card -->
+      <div class="animate card p-8">
+        <div class="mb-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-12 h-12 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center">
+              <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 8a6 6 0 01-7.743 5.743L10 14l-1 1-1 1H6v2H2v-4l4.257-4.257A6 6 0 1118 8zm-6-4a1 1 0 100 2 2 2 0 012 2 1 1 0 102 0 4 4 0 00-4-4z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+            <div>
+              <p class="text-slate-700 dark:text-slate-300 text-lg">Welcome back, <span class="font-semibold text-slate-900 dark:text-white">{session.user?.name || 'User'}</span>!</p>
+              <div id="accountStatus" class="flex items-center gap-2">
+                <span class="text-slate-600 dark:text-slate-400">Account Status:</span>
+                <span id="statusText" class="font-semibold">Loading...</span>
+              </div>
+            </div>
           </div>
-          <p class="text-gray-700 dark:text-gray-300">Below is your personal API key for accessing Research Computer services:</p>
+          <p class="text-slate-600 dark:text-slate-300">Below is your personal API key for accessing Swiss AI Platform services:</p>
         </div>
         
-        <div class="relative mt-4 mb-6">
-          <div class="flex">
+        <div class="relative mt-6 mb-8">
+          <div class="flex rounded-xl overflow-hidden shadow-lg">
             <input 
               type="text" 
               id="apiKeyDisplay" 
               value={apiKey} 
               readonly 
-              class="flex-grow px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-l-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none"
+              class="flex-grow px-6 py-4 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none font-mono text-sm border-r border-slate-200 dark:border-slate-700"
             />
             <button 
               id="copyButton" 
-              class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-r-md transition-colors"
+              class="px-6 py-4 btn-primary"
             >
+              <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z"/>
+                <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z"/>
+              </svg>
               Copy
             </button>
           </div>
-          <div id="copyMessage" class="hidden absolute -bottom-6 left-0 text-green-600 dark:text-green-400 text-sm">
-            Copied to clipboard!
+          <div id="copyMessage" class="hidden absolute -bottom-8 left-0 text-emerald-600 dark:text-emerald-400 text-sm font-medium">
+            ✓ Copied to clipboard!
           </div>
-          <div id="loadingMessage" class="absolute -bottom-6 left-0 text-blue-600 dark:text-blue-400 text-sm">
+          <div id="loadingMessage" class="absolute -bottom-8 left-0 text-indigo-600 dark:text-indigo-400 text-sm">
             Loading your API key...
           </div>
-          <div id="errorMessage" class="hidden absolute -bottom-6 left-0 text-red-600 dark:text-red-400 text-sm">
+          <div id="errorMessage" class="hidden absolute -bottom-8 left-0 text-red-600 dark:text-red-400 text-sm">
             Error loading API key. Please login again.
-            <SignIn provider="auth0" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition-colors">
+            <SignIn provider="auth0" class="btn-primary ml-2">
             Login
           </SignIn>
           </div>
         </div>
         
-        <div class="mt-8">
-          <h2 class="text-xl font-semibold text-black dark:text-white mb-3">How to use your API key</h2>
-          <div class="space-y-4 text-gray-700 dark:text-gray-300">
-            <p>Include this API key in the header of your requests to the {SITE.NAME} API:</p>
-            <div class="bg-gray-200 dark:bg-gray-900 p-3 rounded-md overflow-x-auto">
-              <pre><code class="text-sm">Authorization: Bearer <span id="headerApiKey">your-api-key</span></code></pre>
+        <!-- Usage Instructions -->
+        <div class="space-y-6">
+          <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-4">How to use your API key</h2>
+          
+          <!-- Header Example -->
+          <div class="space-y-3">
+            <h3 class="text-lg font-semibold text-slate-800 dark:text-slate-200">Authorization Header</h3>
+            <p class="text-slate-600 dark:text-slate-400">Include this API key in the header of your requests:</p>
+            <div class="card p-4 bg-slate-50 dark:bg-slate-800/50">
+              <pre class="text-sm text-slate-700 dark:text-slate-300 overflow-x-auto"><code>Authorization: Bearer <span id="headerApiKey" class="text-indigo-600 dark:text-indigo-400">your-api-key</span></code></pre>
             </div>
-            If you cannot see your API key, please sign out and sign in again to refresh your session.
+          </div>
 
-            <p>The endpoint is compatible with OpenAI protocol. Example Python request:</p>
-            <div class="bg-gray-200 dark:bg-gray-900 p-3 rounded-md overflow-x-auto">
-              <pre><code class="text-sm" id="pythonApiKey">test</code></pre>
+          <!-- Python Example -->
+          <div class="space-y-3">
+            <h3 class="text-lg font-semibold text-slate-800 dark:text-slate-200">Python Example</h3>
+            <p class="text-slate-600 dark:text-slate-400">The endpoint is compatible with OpenAI protocol:</p>
+            <div class="card p-4 bg-slate-50 dark:bg-slate-800/50">
+              <pre class="text-sm text-slate-700 dark:text-slate-300 overflow-x-auto"><code id="pythonApiKey">Loading example...</code></pre>
             </div>
+          </div>
+          
+          <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 mt-6">
+            <p class="text-amber-800 dark:text-amber-200 text-sm">
+              <strong>Note:</strong> If you cannot see your API key, please sign out and sign in again to refresh your session.
+            </p>
           </div>
         </div>
       </div>
       
-      <div class="animate p-6 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-md">
-        <h2 class="text-xl font-semibold text-black dark:text-white mb-3">API Key Security</h2>
-        <div class="space-y-3 text-gray-700 dark:text-gray-300">
-          <p>⚠️ <span class="font-semibold">Keep your API key secure</span>. Do not share it publicly or include it in client-side code.</p>
-          <p>If you believe your API key has been compromised, please contact support to reset it.</p>
+      <!-- Security Information Card -->
+      <div class="animate card p-8 bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 border-red-200 dark:border-red-800">
+        <div class="flex items-start gap-4">
+          <div class="w-12 h-12 bg-gradient-to-r from-red-600 to-red-700 rounded-xl flex items-center justify-center flex-shrink-0">
+            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-xl font-bold text-red-900 dark:text-red-100 mb-3">API Key Security</h2>
+            <div class="space-y-3 text-red-800 dark:text-red-200">
+              <p><span class="font-semibold">⚠️ Keep your API key secure</span>. Do not share it publicly or include it in client-side code.</p>
+              <p>If you believe your API key has been compromised, please contact support to reset it.</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

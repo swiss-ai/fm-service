@@ -13,29 +13,44 @@ export const prerender = false;
 
 <PageLayout title="LLM Arena Details" description="Detailed comparison views and head-to-head model evaluations">
   <WideContainer>
-    <div class="space-y-8">
-      <header class="animate text-center">
-        <h1 class="text-4xl font-bold text-black dark:text-white mb-2">
-          LLM Arena <span class="text-3xl">🏆</span>
-        </h1>
-        <p class="text-gray-700 dark:text-gray-300 text-lg">
-          Explore rankings and head-to-head performance comparisons of large language models based on human evaluations.
-        </p>
+    <div class="space-y-12">
+      <!-- Hero Section -->
+      <header class="animate text-center py-8">
+        <div class="max-w-4xl mx-auto">
+          <h1 class="text-4xl md:text-6xl font-bold gradient-text mb-6 leading-tight">
+            LLM Arena <span class="text-4xl md:text-5xl">🏆</span>
+          </h1>
+          <p class="text-xl md:text-2xl text-slate-600 dark:text-slate-300 mb-8 leading-relaxed">
+            Explore rankings and head-to-head performance comparisons of large language models based on human evaluations
+          </p>
+          
+          <!-- Status Card -->
+          <div class="animate-delay-1 inline-flex items-center gap-4 card px-8 py-4">
+            <div class="w-3 h-3 status-online rounded-full"></div>
+            <span class="font-medium text-slate-700 dark:text-slate-300">
+              Detailed Analysis • Real Examples • In-Depth Comparisons
+            </span>
+          </div>
+        </div>
       </header>
 
+      <!-- Details Section Header -->
       <div class="animate text-center">
-        <h2 class="text-2xl font-semibold text-black dark:text-white mb-4">
-          Details
+        <h2 class="text-3xl font-bold text-slate-900 dark:text-white mb-4">
+          Detailed Analysis
         </h2>
-        <p class="text-gray-600 dark:text-gray-400">
-          Detailed comparison views with actual prompts, responses, and evaluation reasoning.
+        <p class="text-lg text-slate-600 dark:text-slate-400 max-w-3xl mx-auto">
+          Dive deep into model comparisons with actual prompts, responses, and evaluation reasoning to understand performance differences
         </p>
       </div>
 
       <ArenaNav currentPage="details" />
 
+      <!-- Arena Details Component -->
       <section class="animate">
-        <ArenaDetails elosData={elosData} client:load />
+        <div class="card p-8">
+          <ArenaDetails elosData={elosData} client:load />
+        </div>
       </section>
     </div>
   </WideContainer>

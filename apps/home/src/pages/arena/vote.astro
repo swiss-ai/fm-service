@@ -9,67 +9,139 @@ export const prerender = false;
 
 <PageLayout title="LLM Arena Vote" description="Vote on model comparisons in the LLM Arena">
   <Container>
-    <div class="space-y-8">
-      <header class="animate text-center">
-        <h1 class="text-4xl font-bold text-black dark:text-white mb-2">
-          LLM Arena <span class="text-3xl">🏆</span>
-        </h1>
-        <p class="text-gray-700 dark:text-gray-300 text-lg">
-          Explore rankings and head-to-head performance comparisons of large language models based on human evaluations.
-        </p>
+    <div class="space-y-12">
+      <!-- Hero Section -->
+      <header class="animate text-center py-8">
+        <div class="max-w-4xl mx-auto">
+          <h1 class="text-4xl md:text-6xl font-bold gradient-text mb-6 leading-tight">
+            LLM Arena <span class="text-4xl md:text-5xl">🏆</span>
+          </h1>
+          <p class="text-xl md:text-2xl text-slate-600 dark:text-slate-300 mb-8 leading-relaxed">
+            Explore rankings and head-to-head performance comparisons of large language models based on human evaluations
+          </p>
+          
+          <!-- Status Card -->
+          <div class="animate-delay-1 inline-flex items-center gap-4 card px-8 py-4">
+            <div class="w-3 h-3 bg-amber-500 animate-pulse rounded-full"></div>
+            <span class="font-medium text-slate-700 dark:text-slate-300">
+              Voting System • Coming Soon • Community Driven
+            </span>
+          </div>
+        </div>
       </header>
 
+      <!-- Vote Section Header -->
       <div class="animate text-center">
-        <h2 class="text-2xl font-semibold text-black dark:text-white mb-4">
-          Vote
+        <h2 class="text-3xl font-bold text-slate-900 dark:text-white mb-4">
+          Vote & Evaluate
         </h2>
-        <p class="text-gray-600 dark:text-gray-400">
-          Vote on model comparisons to help improve the rankings.
+        <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+          Help improve model rankings by evaluating and voting on AI responses
         </p>
       </div>
 
       <ArenaNav currentPage="vote" />
 
+      <!-- Coming Soon Section -->
       <section class="animate">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-8">
-          <div class="text-center">
-            <div class="mb-6">
-              <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto">
-                <svg class="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        <div class="card p-12 text-center bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 border-indigo-200 dark:border-indigo-800">
+          <!-- Icon -->
+          <div class="mb-8">
+            <div class="w-24 h-24 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full flex items-center justify-center mx-auto shadow-lg">
+              <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+          </div>
+          
+          <h3 class="text-3xl font-bold text-slate-900 dark:text-white mb-6">
+            Voting Interface Coming Soon
+          </h3>
+          
+          <p class="text-xl text-slate-600 dark:text-slate-300 mb-12 max-w-2xl mx-auto leading-relaxed">
+            We're building an advanced voting system that will allow you to evaluate model responses 
+            and contribute to the arena rankings through blind comparisons.
+          </p>
+          
+          <!-- Features Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-12">
+            <div class="card p-6 bg-white/50 dark:bg-slate-800/50">
+              <div class="w-12 h-12 bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
               </div>
+              <h4 class="text-lg font-semibold text-slate-900 dark:text-white mb-2">Side-by-Side Comparisons</h4>
+              <p class="text-slate-600 dark:text-slate-400 text-sm">
+                Compare model responses side-by-side with identical prompts for fair evaluation
+              </p>
             </div>
-            
-            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-              Voting Coming Soon
-            </h3>
-            
-            <p class="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
-              The voting interface is under development. This will allow you to evaluate model responses 
-              and contribute to the arena rankings.
-            </p>
-            
-            <div class="space-y-4 text-left max-w-lg mx-auto">
-              <h4 class="font-semibold text-gray-900 dark:text-white">Planned Features:</h4>
-              <ul class="space-y-2 text-gray-600 dark:text-gray-400">
-                <li class="flex items-start space-x-2">
-                  <span class="text-blue-500 mt-1">•</span>
-                  <span>Side-by-side model response comparisons</span>
-                </li>
-                <li class="flex items-start space-x-2">
-                  <span class="text-blue-500 mt-1">•</span>
-                  <span>Blind evaluation to reduce bias</span>
-                </li>
-                <li class="flex items-start space-x-2">
-                  <span class="text-blue-500 mt-1">•</span>
-                  <span>Various prompt categories and difficulty levels</span>
-                </li>
-                <li class="flex items-start space-x-2">
-                  <span class="text-blue-500 mt-1">•</span>
-                  <span>Real-time ELO rating updates</span>
-                </li>
-              </ul>
+
+            <div class="card p-6 bg-white/50 dark:bg-slate-800/50">
+              <div class="w-12 h-12 bg-gradient-to-r from-purple-600 to-purple-700 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clip-rule="evenodd"/>
+                  <path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z"/>
+                </svg>
+              </div>
+              <h4 class="text-lg font-semibold text-slate-900 dark:text-white mb-2">Blind Evaluation</h4>
+              <p class="text-slate-600 dark:text-slate-400 text-sm">
+                Model identities hidden during evaluation to reduce bias and ensure fair rankings
+              </p>
+            </div>
+
+            <div class="card p-6 bg-white/50 dark:bg-slate-800/50">
+              <div class="w-12 h-12 bg-gradient-to-r from-teal-600 to-teal-700 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+              <h4 class="text-lg font-semibold text-slate-900 dark:text-white mb-2">Diverse Categories</h4>
+              <p class="text-slate-600 dark:text-slate-400 text-sm">
+                Various prompt categories and difficulty levels to test different model capabilities
+              </p>
+            </div>
+
+            <div class="card p-6 bg-white/50 dark:bg-slate-800/50">
+              <div class="w-12 h-12 bg-gradient-to-r from-amber-600 to-amber-700 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                </svg>
+              </div>
+              <h4 class="text-lg font-semibold text-slate-900 dark:text-white mb-2">Real-time Rankings</h4>
+              <p class="text-slate-600 dark:text-slate-400 text-sm">
+                ELO ratings updated in real-time based on community votes and evaluations
+              </p>
+            </div>
+          </div>
+
+          <!-- Call to Action -->
+          <div class="space-y-6">
+            <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-6">
+              <div class="flex items-center justify-center gap-3 mb-3">
+                <svg class="w-6 h-6 text-amber-600 dark:text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                </svg>
+                <h4 class="text-lg font-semibold text-amber-900 dark:text-amber-100">Stay Updated</h4>
+              </div>
+              <p class="text-amber-800 dark:text-amber-200 text-sm">
+                Want to be notified when voting goes live? Follow our development progress and be among the first to contribute to the rankings.
+              </p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+              <a href="/arena/leaderboard" class="btn-primary">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                </svg>
+                View Current Rankings
+              </a>
+              <a href="/arena/details" class="btn-secondary">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"/>
+                </svg>
+                Explore Details
+              </a>
             </div>
           </div>
         </div>
