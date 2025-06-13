@@ -10,12 +10,12 @@ interface Props {
 const { name, logo, url, width = 158, height = 48 } = Astro.props;
 ---
 
-<div class="col-span-2 max-h-12 w-full object-contain lg:col-span-2">
+<div class="group flex items-center justify-center p-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-lg dark:hover:shadow-gray-900/25 transition-all duration-300 ease-in-out transform hover:scale-105">
   {url ? (
-    <a href={url} target="_blank" rel="noopener noreferrer">
-      <img src={logo} alt={name} width={width} height={height} class="w-full h-full object-contain" />
+    <a href={url} target="_blank" rel="noopener noreferrer" class="flex items-center justify-center w-full h-full">
+      <img src={logo} alt={name} width={width} height={height} class="max-w-full max-h-12 object-contain filter grayscale group-hover:grayscale-0 transition-all duration-300" />
     </a>
   ) : (
-    <img src={logo} alt={name} width={width} height={height} class="w-full h-full object-contain" />
+    <img src={logo} alt={name} width={width} height={height} class="max-w-full max-h-12 object-contain filter grayscale group-hover:grayscale-0 transition-all duration-300" />
   )}
 </div> 
