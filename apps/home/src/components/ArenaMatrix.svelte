@@ -57,12 +57,31 @@
   }
 
   function handleMouseMove(event, i, j, model1, model2) {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const tooltipWidth = 250; // Approximate tooltip width
+    const tooltipHeight = 80; // Approximate tooltip height
+    
+    // Calculate position relative to the cell
+    let x = event.clientX + 15;
+    let y = event.clientY - 10;
+    
+    // Prevent tooltip from going off-screen
+    if (x + tooltipWidth > window.innerWidth) {
+      x = event.clientX - tooltipWidth - 15;
+    }
+    if (y + tooltipHeight > window.innerHeight) {
+      y = event.clientY - tooltipHeight - 10;
+    }
+    if (y < 0) {
+      y = event.clientY + 15;
+    }
+    
     hoveredCell = {
       i, j, model1, model2, 
       winRate: matrix[i][j], 
       totalGames: getTotalGames(model1, model2),
-      x: event.clientX + 10,
-      y: event.clientY - 10
+      x: x,
+      y: y
     };
   }
 
@@ -218,10 +237,10 @@
 
 <!-- Tooltip -->
 {#if hoveredCell}
-  <div class="fixed z-50 px-4 py-3 bg-gray-900 text-white text-sm rounded-lg shadow-xl pointer-events-none max-w-xs"
-       style="left: {hoveredCell.x}px; top: {hoveredCell.y}px;">
-    <div class="font-semibold mb-1">{getDisplayName(hoveredCell.model1)} vs {getDisplayName(hoveredCell.model2)}</div>
-    <div class="text-gray-300">Win Rate: <span class="text-white font-medium">{formatPercentage(hoveredCell.winRate)}</span></div>
-    <div class="text-gray-300">Total Games: <span class="text-white font-medium">{hoveredCell.totalGames}</span></div>
+  <div class="fixed z-50 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg shadow-xl pointer-events-none transition-all duration-75"
+       style="left: {hoveredCell.x}px; top: {hoveredCell.y}px; max-width: 250px;">
+    <div class="font-semibold mb-1 text-xs">{getDisplayName(hoveredCell.model1)} vs {getDisplayName(hoveredCell.model2)}</div>
+    <div class="text-gray-300 text-xs">Win Rate: <span class="text-white font-medium">{formatPercentage(hoveredCell.winRate)}</span></div>
+    <div class="text-gray-300 text-xs">Total Games: <span class="text-white font-medium">{hoveredCell.totalGames}</span></div>
   </div>
 {/if}

@@ -2,6 +2,7 @@
 import Container from "@components/Container.astro";
 import PageLayout from "@layouts/PageLayout.astro";
 import ArenaNav from "@components/ArenaNav.astro";
+import ArenaHeader from "@components/ArenaHeader.astro";
 import { SITE } from "@consts";
 
 export const prerender = false;
@@ -10,25 +11,9 @@ export const prerender = false;
 <PageLayout title="LLM Arena Vote" description="Vote on model comparisons in the LLM Arena">
   <Container>
     <div class="space-y-12">
-      <!-- Hero Section -->
-      <header class="animate text-center py-8">
-        <div class="max-w-4xl mx-auto">
-          <h1 class="text-4xl md:text-6xl font-bold gradient-text mb-6 leading-tight">
-            LLM Arena <span class="text-4xl md:text-5xl">🏆</span>
-          </h1>
-          <p class="text-xl md:text-2xl text-slate-600 dark:text-slate-300 mb-8 leading-relaxed">
-            Explore rankings and head-to-head performance comparisons of large language models based on human evaluations
-          </p>
-          
-          <!-- Status Card -->
-          <div class="animate-delay-1 inline-flex items-center gap-4 card px-8 py-4">
-            <div class="w-3 h-3 bg-amber-500 animate-pulse rounded-full"></div>
-            <span class="font-medium text-slate-700 dark:text-slate-300">
-              Voting System • Coming Soon • Community Driven
-            </span>
-          </div>
-        </div>
-      </header>
+      <ArenaHeader />
+
+      <ArenaNav currentPage="vote" />
 
       <!-- Vote Section Header -->
       <div class="animate text-center">
@@ -39,8 +24,6 @@ export const prerender = false;
           Help improve model rankings by evaluating and voting on AI responses
         </p>
       </div>
-
-      <ArenaNav currentPage="vote" />
 
       <!-- Coming Soon Section -->
       <section class="animate">
@@ -89,46 +72,10 @@ export const prerender = false;
                 Model identities hidden during evaluation to reduce bias and ensure fair rankings
               </p>
             </div>
-
-            <div class="card p-6 bg-white/50 dark:bg-slate-800/50">
-              <div class="w-12 h-12 bg-gradient-to-r from-teal-600 to-teal-700 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clip-rule="evenodd"/>
-                </svg>
-              </div>
-              <h4 class="text-lg font-semibold text-slate-900 dark:text-white mb-2">Diverse Categories</h4>
-              <p class="text-slate-600 dark:text-slate-400 text-sm">
-                Various prompt categories and difficulty levels to test different model capabilities
-              </p>
-            </div>
-
-            <div class="card p-6 bg-white/50 dark:bg-slate-800/50">
-              <div class="w-12 h-12 bg-gradient-to-r from-amber-600 to-amber-700 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                </svg>
-              </div>
-              <h4 class="text-lg font-semibold text-slate-900 dark:text-white mb-2">Real-time Rankings</h4>
-              <p class="text-slate-600 dark:text-slate-400 text-sm">
-                ELO ratings updated in real-time based on community votes and evaluations
-              </p>
-            </div>
           </div>
 
           <!-- Call to Action -->
           <div class="space-y-6">
-            <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-6">
-              <div class="flex items-center justify-center gap-3 mb-3">
-                <svg class="w-6 h-6 text-amber-600 dark:text-amber-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-                </svg>
-                <h4 class="text-lg font-semibold text-amber-900 dark:text-amber-100">Stay Updated</h4>
-              </div>
-              <p class="text-amber-800 dark:text-amber-200 text-sm">
-                Want to be notified when voting goes live? Follow our development progress and be among the first to contribute to the rankings.
-              </p>
-            </div>
-
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
               <a href="/arena/leaderboard" class="btn-primary">
                 <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
