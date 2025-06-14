@@ -77,145 +77,199 @@ const sponsors = [
 
 <PageLayout title={HOME.TITLE} description={HOME.DESCRIPTION}>
   <Container>
-    <h4 class="animate font-semibold text-black dark:text-white">
-      Welcome to {SITE.NAME} <span class="text-xl">👋🏻</span> 
-    </h4>
-    
-    <div class="my-6 flex flex-col md:flex-row items-start md:items-center gap-4">
-      {isSessionValid ? (
-        <div class="w-full flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div class="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
-            <p class="text-sm text-gray-600 dark:text-gray-400">Logged in as</p>
-            <p class="font-medium text-black dark:text-white">{session.user?.name || 'User'}</p>
-          </div>
-          <div class="flex gap-3">
-            <a href="/api_key" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded transition-colors">
-              View API Key
-            </a>
-            <SignOut class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded transition-colors">
-              Logout
-            </SignOut>
-          </div>
-        </div>
-      ) : (
-        <div class="w-full flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <p class="text-gray-700 dark:text-gray-300">
-            Sign in to get your API key and access our LLM services.
-          </p>
-          <SignIn provider="auth0" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition-colors">
-            Login
-          </SignIn>
-        </div>
-      )}
-    </div>
-    
-    <div class="mt-8 flex flex-col sm:flex-row gap-4">
-      <a href="https://chat.swissai.cscs.ch" target="_blank" rel="noopener noreferrer"
-         class="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-200">
-        <i class="fas fa-comments"></i>
-        Swiss AI Chat
-      </a>
-      <a href="/arena/" target="_blank" rel="noopener noreferrer"
-         class="flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-medium py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-200">
-        <i class="fas fa-trophy"></i>
-        LM Arena
-      </a>
-    </div>
-
-    <div class="space-y-16">
-      <section>
-        <article class="space-y-4">
-          <p class="animate dark:text-white">
-            {SITE.NAME} is based on Research Computer, which is a research platform for serving foundation models in a decentralized, cost-efficient way.
-          </p>
-          <p class="animate dark:text-white">
-            By using the platform, you agree to the following terms and conditions:
-            <ul class="animate dark:text-white">
-              <li>You allow us to collect metadata of your requests, including but not limited to token length, timestamp, requested models, etc, for research purpose and to improve the service.</li>
-            </ul>
-          </p>
-        </article>
-      </section>
+    <div class="space-y-20">
       
-      <section>
-        <p class="animate dark:text-white">
-          Models currently available on the platform:
-        </p>
-        <div class="animate space-y-4">
+      <!-- Hero Section -->
+      <section class="animate text-center py-16">
+        <div class="max-w-5xl mx-auto">
+          <h1 class="text-5xl md:text-7xl font-bold gradient-text mb-8 leading-tight">
+            Swiss AI Initiative
+          </h1>
+          <p class="text-xl md:text-2xl text-slate-600 dark:text-slate-300 mb-12 leading-relaxed max-w-3xl mx-auto">
+            Internal R&D Platform
+          </p>
+          
+          <!-- Authentication Section -->
+          <div class="animate-delay-2 mb-12">
+            {isSessionValid ? (
+              <div class="card p-6 max-w-2xl mx-auto">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                  <div class="text-center md:text-left">
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mb-1">Welcome back</p>
+                    <p class="text-xl font-semibold text-slate-900 dark:text-white">{session.user?.name || 'User'}</p>
+                  </div>
+                  <div class="flex gap-3">
+                    <a href="/api_key" class="btn-primary">
+                      <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 8a6 6 0 01-7.743 5.743L10 14l-1 1-1 1H6v2H2v-4l4.257-4.257A6 6 0 1118 8zm-6-4a1 1 0 100 2 2 2 0 012 2 1 1 0 102 0 4 4 0 00-4-4z" clip-rule="evenodd"/>
+                      </svg>
+                      View API Key
+                    </a>
+                    <SignOut class="btn-secondary">
+                      Logout
+                    </SignOut>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div class="card p-6 max-w-2xl mx-auto">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                  <div class="text-center md:text-left">
+                    <h3 class="text-lg font-semibold text-slate-900 dark:text-white mb-2">Get Started</h3>
+                    <p class="text-slate-600 dark:text-slate-300">
+                      Sign in to get your API key and access our LLM services
+                    </p>
+                  </div>
+                  <SignIn provider="auth0" class="btn-primary">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M3 3a1 1 0 011 1v12a1 1 0 11-2 0V4a1 1 0 011-1zm7.707 3.293a1 1 0 010 1.414L9.414 9H17a1 1 0 110 2H9.414l1.293 1.293a1 1 0 01-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                    </svg>
+                    Sign In
+                  </SignIn>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="animate-delay-3 flex flex-col sm:flex-row gap-6 justify-center">
+            <a href="https://chat.swissai.cscs.ch" target="_blank" rel="noopener noreferrer"
+               class="group flex items-center justify-center gap-3 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-semibold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+              <svg class="w-6 h-6 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clip-rule="evenodd"/>
+              </svg>
+              Swiss AI Chat
+            </a>
+            <a 
+              href="/arena/leaderboard" 
+              class="group flex items-center justify-center gap-3 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-semibold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+              <svg class="w-6 h-6 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+              </svg>
+              LM Arena
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Available Models Section -->
+      <section class="animate space-y-8">
+        <div class="text-center">
+          <h2 class="text-3xl font-bold text-slate-900 dark:text-white mb-4">
+            Available Models
+          </h2>
+          <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto mb-8">
+            Access state-of-the-art language models from leading AI research organizations
+          </p>
+        </div>
+        
+        <div class="card p-8">
           <ModelList client:load />
         </div>
       </section>
 
-      <section>
-        <p class="animate dark:text-white">
-          Token Usage Statistics:
-        </p>
-        <div class="animate space-y-4">
+      <!-- Token Usage Statistics -->
+      <section class="animate space-y-8">
+        <div class="text-center">
+          <h2 class="text-3xl font-bold text-slate-900 dark:text-white mb-4">
+            Usage Analytics
+          </h2>
+          <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto mb-8">
+            Real-time token usage and platform statistics
+          </p>
+        </div>
+        
+        <div class="card p-8">
           <TokenUsageChart client:load />
         </div>
       </section>
       
-      <section class="animate space-y-6">
+      <!-- Documentation Section -->
+      <section class="animate space-y-8">
         <div class="flex flex-wrap gap-y-2 items-center justify-between">
-          <h5 class="font-semibold text-black dark:text-white">
-            Documentation
-          </h5>
-          <Link href="/guides">
-            See all docs
+          <div>
+            <h2 class="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+              Documentation
+            </h2>
+            <p class="text-slate-600 dark:text-slate-400">Get started with our comprehensive guides</p>
+          </div>
+          <Link href="/guides" class="text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium">
+            See all docs →
           </Link>
         </div>
-        <ul class="flex flex-col gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           {docs.map(post => (
-            <li>
+            <div class="card p-6 hover:shadow-xl transition-all duration-300">
               <ArrowCard entry={post} />
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       </section>
 
-      <section class="animate space-y-6">
+      <!-- Research Articles Section -->
+      <section class="animate space-y-8">
         <div class="flex flex-wrap gap-y-2 items-center justify-between">
-          <h5 class="font-semibold text-black dark:text-white">
-            Research Articles
-          </h5>
-          <Link href="/articles">
-            See all posts
+          <div>
+            <h2 class="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+              Research Articles
+            </h2>
+            <p class="text-slate-600 dark:text-slate-400">Latest insights from our research team</p>
+          </div>
+          <Link href="/articles" class="text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium">
+            See all posts →
           </Link>
         </div>
-        <ul class="flex flex-col gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {articles.map(article => (
-            <li>
+            <div class="card p-6 hover:shadow-xl transition-all duration-300">
               <ArrowCard entry={article} />
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section class="animate space-y-6">
-        <div class="flex flex-wrap gap-y-2 items-center justify-between">
-          <h5 class="font-semibold text-black dark:text-white">
-            Contributors of the Serving Platform
-          </h5>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {contributors.map(contributor => (
-            <ContributorCard {...contributor} />
-          ))}
-        </div>
-      </section>
-
-      <section class="animate space-y-6">
-        <div class="py-8 sm:py-8">
-          <div class="mx-auto max-w-7xl px-6 lg:px-8">
-            <div class="mx-auto grid max-w-lg grid-cols-4 items-center gap-x-8 gap-y-12 sm:max-w-xl sm:grid-cols-6 sm:gap-x-10 sm:gap-y-14 lg:mx-0 lg:max-w-none lg:grid-cols-5">
-              {sponsors.map(sponsor => (
-                sponsor.component ? (
-                  <sponsor.component class="col-span-2 max-h-12 w-full object-contain lg:col-span-2" width={158} height={48} />
-                ) : (
-                  <SponsorCard {...sponsor} />
-                )
-              ))}
             </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- Contributors Section -->
+      <section class="animate space-y-8">
+        <div class="text-center">
+          <h2 class="text-3xl font-bold text-slate-900 dark:text-white mb-4">
+            Platform Contributors
+          </h2>
+          <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto mb-8">
+            Meet the talented team behind Switzerland's AI infrastructure
+          </p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {contributors.map(contributor => (
+            <div class="card p-6 text-center hover:shadow-xl transition-all duration-300">
+              <ContributorCard {...contributor} />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- Sponsors Section -->
+      <section class="animate space-y-8">
+        <div class="text-center">
+          <h2 class="text-3xl font-bold text-slate-900 dark:text-white mb-4">
+            Institutional Partners
+          </h2>
+          <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto mb-8">
+            Powered by Switzerland's leading research institutions
+          </p>
+        </div>
+        <div class="card p-12">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-12 items-center justify-items-center">
+            {sponsors.map(sponsor => (
+              sponsor.component ? (
+                <div class="opacity-70 hover:opacity-100 transition-opacity duration-300 transform hover:scale-105">
+                  <sponsor.component class="h-16 w-auto object-contain" width={158} height={48} />
+                </div>
+              ) : (
+                <div class="opacity-70 hover:opacity-100 transition-opacity duration-300 transform hover:scale-105">
+                  <SponsorCard {...sponsor} />
+                </div>
+              )
+            ))}
           </div>
         </div>
       </section>

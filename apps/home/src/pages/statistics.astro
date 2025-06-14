@@ -1,12 +1,162 @@
 ---
 import PageLayout from "@layouts/PageLayout.astro";
-import { SITE, HOME } from "@consts";
-import StatisticsChart from '../components/StatisticsChart.svelte';
+import Container from "@components/Container.astro";
+import { SITE } from "@consts";
+
+export const prerender = false;
 ---
 
-<PageLayout title={HOME.TITLE} description={HOME.DESCRIPTION}>
-  <main class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold mb-8">SwissAI Usage Statistics</h1>
-    <StatisticsChart client:load />
-  </main>
+<PageLayout title="Statistics" description="Platform usage statistics and analytics">
+  <Container>
+    <div class="space-y-12">
+      <!-- Hero Section -->
+      <header class="animate text-center py-8">
+        <div class="max-w-4xl mx-auto">
+          <h1 class="text-4xl md:text-6xl font-bold gradient-text mb-6 leading-tight">
+            Platform Statistics <span class="text-4xl md:text-5xl">📊</span>
+          </h1>
+          <p class="text-xl md:text-2xl text-slate-600 dark:text-slate-300 mb-8 leading-relaxed">
+            Real-time insights into platform usage, model performance, and community engagement
+          </p>
+          
+          <!-- Status Card -->
+          <div class="animate-delay-1 inline-flex items-center gap-4 card px-8 py-4">
+            <div class="w-3 h-3 status-online rounded-full"></div>
+            <span class="font-medium text-slate-700 dark:text-slate-300">
+              Live Data • Real-time Updates • Comprehensive Analytics
+            </span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Coming Soon Section -->
+      <section class="animate">
+        <div class="card p-12 text-center bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border-blue-200 dark:border-blue-800">
+          <!-- Icon -->
+          <div class="mb-8">
+            <div class="w-24 h-24 bg-gradient-to-r from-blue-600 to-blue-700 rounded-full flex items-center justify-center mx-auto shadow-lg">
+              <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+              </svg>
+            </div>
+          </div>
+          
+          <h3 class="text-3xl font-bold text-slate-900 dark:text-white mb-6">
+            Analytics Dashboard Coming Soon
+          </h3>
+          
+          <p class="text-xl text-slate-600 dark:text-slate-300 mb-12 max-w-2xl mx-auto leading-relaxed">
+            We're building comprehensive analytics to provide insights into platform usage, 
+            model performance metrics, and community engagement statistics.
+          </p>
+          
+          <!-- Features Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto mb-12">
+            <div class="card p-6 bg-white/50 dark:bg-slate-800/50">
+              <div class="w-12 h-12 bg-gradient-to-r from-green-600 to-green-700 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"/>
+                  <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"/>
+                </svg>
+              </div>
+              <h4 class="text-lg font-semibold text-slate-900 dark:text-white mb-2">Usage Analytics</h4>
+              <p class="text-slate-600 dark:text-slate-400 text-sm">
+                Track API calls, token usage, and service utilization across all models
+              </p>
+            </div>
+
+            <div class="card p-6 bg-white/50 dark:bg-slate-800/50">
+              <div class="w-12 h-12 bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+              <h4 class="text-lg font-semibold text-slate-900 dark:text-white mb-2">Performance Metrics</h4>
+              <p class="text-slate-600 dark:text-slate-400 text-sm">
+                Monitor response times, success rates, and model performance benchmarks
+              </p>
+            </div>
+
+            <div class="card p-6 bg-white/50 dark:bg-slate-800/50">
+              <div class="w-12 h-12 bg-gradient-to-r from-orange-600 to-orange-700 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"/>
+                </svg>
+              </div>
+              <h4 class="text-lg font-semibold text-slate-900 dark:text-white mb-2">User Engagement</h4>
+              <p class="text-slate-600 dark:text-slate-400 text-sm">
+                Analyze user activity, popular models, and community participation
+              </p>
+            </div>
+
+            <div class="card p-6 bg-white/50 dark:bg-slate-800/50">
+              <div class="w-12 h-12 bg-gradient-to-r from-red-600 to-red-700 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+              <h4 class="text-lg font-semibold text-slate-900 dark:text-white mb-2">Trend Analysis</h4>
+              <p class="text-slate-600 dark:text-slate-400 text-sm">
+                Identify usage patterns, peak times, and emerging model preferences
+              </p>
+            </div>
+
+            <div class="card p-6 bg-white/50 dark:bg-slate-800/50">
+              <div class="w-12 h-12 bg-gradient-to-r from-teal-600 to-teal-700 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+              <h4 class="text-lg font-semibold text-slate-900 dark:text-white mb-2">Historical Data</h4>
+              <p class="text-slate-600 dark:text-slate-400 text-sm">
+                Access historical performance data and long-term usage trends
+              </p>
+            </div>
+
+            <div class="card p-6 bg-white/50 dark:bg-slate-800/50">
+              <div class="w-12 h-12 bg-gradient-to-r from-indigo-600 to-indigo-700 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+              <h4 class="text-lg font-semibold text-slate-900 dark:text-white mb-2">Custom Reports</h4>
+              <p class="text-slate-600 dark:text-slate-400 text-sm">
+                Generate custom analytics reports and export data for further analysis
+              </p>
+            </div>
+          </div>
+
+          <!-- Call to Action -->
+          <div class="space-y-6">
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
+              <div class="flex items-center justify-center gap-3 mb-3">
+                <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                </svg>
+                <h4 class="text-lg font-semibold text-blue-900 dark:text-blue-100">Analytics in Development</h4>
+              </div>
+              <p class="text-blue-800 dark:text-blue-200 text-sm">
+                Our analytics dashboard is currently under development. We're working on comprehensive statistics and insights for the platform.
+              </p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+              <a href="/" class="btn-primary">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
+                </svg>
+                Back to Home
+              </a>
+              <a href="/arena/leaderboard" class="btn-secondary">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                </svg>
+                View Arena Rankings
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </Container>
 </PageLayout> 
