@@ -3,7 +3,7 @@ import { getSession } from 'auth-astro/server';
 import PageLayout from "@layouts/PageLayout.astro";
 import Container from "@components/Container.astro";
 import { SITE } from "@consts";
-import { getApiKey, getUserProfile } from '@lib/auth';
+import { getUserProfile } from '@lib/auth';
 import { SignIn } from 'auth-astro/components';
 
 export const prerender = false;
@@ -37,7 +37,7 @@ let apiKey = "Loading...";
       <div class="animate card p-8">
         <div class="mb-6">
           <div class="flex items-center gap-3 mb-4">
-            <div class="w-12 h-12 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center">
+            <div class="w-12 h-12 bg-gradient-to-r from-indigo-600 to-blue-600 rounded-xl flex items-center justify-center">
               <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M18 8a6 6 0 01-7.743 5.743L10 14l-1 1-1 1H6v2H2v-4l4.257-4.257A6 6 0 1118 8zm-6-4a1 1 0 100 2 2 2 0 012 2 1 1 0 102 0 4 4 0 00-4-4z" clip-rule="evenodd"/>
               </svg>

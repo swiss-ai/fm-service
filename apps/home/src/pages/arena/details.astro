@@ -4,9 +4,18 @@ import PageLayout from "@layouts/PageLayout.astro";
 import ArenaNav from "@components/ArenaNav.astro";
 import ArenaDetails from "@components/ArenaDetails.svelte";
 import { SITE } from "@consts";
+import fs from 'fs';
+import path from 'path';
 
-// Import only the ELO data at build time, details will be loaded client-side
-import elosData from "../../data/arena/elos.json";
+// Load ELO data from public directory
+let elosData = {};
+try {
+  const publicDir = path.join(process.cwd(), 'public');
+  const elosPath = path.join(publicDir, 'data', 'arena', 'elos.json');
+  elosData = JSON.parse(fs.readFileSync(elosPath, 'utf-8'));
+} catch (error) {
+  console.error('Error loading elos data:', error);
+}
 
 export const prerender = false;
 ---

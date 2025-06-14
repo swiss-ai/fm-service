@@ -59,7 +59,7 @@
   async function loadDetailsData() {
     try {
       dataLoading = true;
-      const response = await fetch('/src/data/arena/details.json');
+      const response = await fetch('/data/arena/details.json');
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -292,7 +292,7 @@
           <button 
             on:click={shuffleEntries}
             disabled={!filteredComparisons.length || loading}
-            class="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 text-white font-medium rounded-md transition-colors flex items-center justify-center space-x-2"
+            class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium rounded-md transition-colors flex items-center justify-center space-x-2"
           >
             <i class="fas fa-random"></i>
             <span>Shuffle</span>
@@ -313,7 +313,7 @@
         <div class="text-sm text-gray-600 dark:text-gray-400">
           Showing {displayedComparisons.length} of {filteredComparisons.length} comparisons
           {#if isShuffled}
-            <span class="ml-2 px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 text-xs font-medium rounded-full">
+            <span class="ml-2 px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 text-xs font-medium rounded-full">
               Shuffled
             </span>
           {/if}

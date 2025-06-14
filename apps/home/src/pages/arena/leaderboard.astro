@@ -5,10 +5,23 @@ import ArenaMatrix from "@components/ArenaMatrix.svelte";
 import ArenaRankings from "@components/ArenaRankings.svelte";
 import ArenaNav from "@components/ArenaNav.astro";
 import { SITE } from "@consts";
+import fs from 'fs';
+import path from 'path';
 
-// Import the original data (not the _upd versions)
-import matrixData from "../../data/arena/matrix.json";
-import elosData from "../../data/arena/elos.json";
+// Load data from public directory
+let matrixData = {};
+let elosData = {};
+
+try {
+  const publicDir = path.join(process.cwd(), 'public');
+  const matrixPath = path.join(publicDir, 'data', 'arena', 'matrix.json');
+  const elosPath = path.join(publicDir, 'data', 'arena', 'elos.json');
+  
+  matrixData = JSON.parse(fs.readFileSync(matrixPath, 'utf-8'));
+  elosData = JSON.parse(fs.readFileSync(elosPath, 'utf-8'));
+} catch (error) {
+  console.error('Error loading arena data:', error);
+}
 
 export const prerender = false;
 ---

@@ -81,7 +81,7 @@ article {
 
 /* Gradient Text Utilities */
 .gradient-text {
-  @apply bg-gradient-to-r from-indigo-600 via-purple-600 to-teal-600 bg-clip-text text-transparent;
+  @apply bg-gradient-to-r from-indigo-600 via-blue-600 to-teal-600 bg-clip-text text-transparent;
 }
 
 .gradient-text-secondary {
@@ -105,8 +105,8 @@ article {
 
 /* Button Enhancements */
 .btn-primary {
-  @apply bg-gradient-to-r from-indigo-600 to-purple-600;
-  @apply hover:from-indigo-700 hover:to-purple-700;
+  @apply bg-gradient-to-r from-indigo-600 to-blue-600;
+  @apply hover:from-indigo-700 hover:to-blue-700;
   @apply text-white font-semibold;
   @apply px-6 py-3 rounded-xl;
   @apply shadow-lg shadow-indigo-500/25;
