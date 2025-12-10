@@ -165,3 +165,51 @@ async def llm_proxy_completions(endpoint, api_key, **kwargs) -> ModelResponse:
         return await _completion()
     except Exception as e:
         raise e
+    
+@backoff.on_exception(
+    wait_gen=backoff.constant,
+    exception=RetryConstantError,
+    max_tries=3,
+    interval=3,
+)
+@backoff.on_exception(
+    wait_gen=backoff.expo,
+    exception=RetryExpoError,
+    jitter=backoff.full_jitter,
+    max_value=100,
+    factor=1.5,
+)
+async def llm_proxy_embeddings(endpoint, api_key, **kwargs) -> ModelResponse:
+    async def _embedding():
+        try:
+            client = openai.AsyncOpenAI(
+                api_key=api_key,
+                base_url=endpoint,
+            )
+            user_id = kwargs.get('user_id', '')
+            del kwargs['user_id']
+            
+            embedding_params = {
+                'model': kwargs.get('model'),
+                'input': kwargs.get('input', []),
+                'encoding_format': kwargs.get('encoding_format', 'float'),
+                'name': 'embeddings-generation',
+                'metadata': {
+                    'langfuse_user_id': user_id,
+                    'application': kwargs.get('application', 'fmservice')
+                }
+            }
+            
+            # Only supported in text-embedding-3 and later models
+            if kwargs.get('dimensions') is not None:
+                embedding_params['dimensions'] = kwargs.get('dimensions')
+            
+            response = await client.embeddings.create(**embedding_params)
+            return response
+        except Exception as e:
+            print(f"Error in llm_proxy_embeddings: {e}")
+            handle_llm_exception(e)
+    try:
+        return await _embedding()
+    except Exception as e:
+        raise e

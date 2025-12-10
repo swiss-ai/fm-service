@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, HTTPException, Depends, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.responses import StreamingResponse
-from proxy.llm_proxy import llm_proxy, response_generator, llm_proxy_completions
+from proxy.llm_proxy import llm_proxy, response_generator, llm_proxy_completions, llm_proxy_embeddings
 from proxy.config import get_settings
 from proxy.auth import get_profile_from_accesstoken, get_or_create_apikey, verify_token
 from proxy.provider import get_all_models
@@ -133,6 +133,30 @@ async def completion(
         return StreamingResponse(stream_generator(), media_type='text/event-stream')
     return response
 
+@app.post("/v1/embeddings")
+async def embeddings(
+        request: Request, 
+        credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
+    ):
+    token = credentials.credentials
+    
+    if not verify_token(engine, token):
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid access token",
+        )
+    data = await request.json()
+    data["user_id"] = token
+    
+    response = await llm_proxy_embeddings(
+        endpoint=settings.ocf_head_addr+"/v1/service/llm/v1/",
+        api_key=token,
+        **data,
+    )
+    
+    return response
+    
+    
 @app.get("/v1/models_detailed")
 async def list_models_detailed():
     models = get_all_models(settings.ocf_head_addr+"/v1/dnt/table", with_details=True)
