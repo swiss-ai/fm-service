@@ -43,6 +43,8 @@ spec:
         envFrom:
           - configMapRef:
               name: serving
+          - secretRef:
+              name: serving-secrets
         resources:
           requests:
             cpu: 2000m

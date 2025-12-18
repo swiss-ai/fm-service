@@ -37,4 +37,6 @@ spec:
         envFrom:
           - configMapRef:
               name: serving
+          - secretRef:
+              name: serving-secrets
       restartPolicy: Always

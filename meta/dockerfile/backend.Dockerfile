@@ -4,7 +4,6 @@ WORKDIR /app
 
 # Copy requirements file and install dependencies
 COPY proxy/ /app/proxy
-COPY .env /app
 
 RUN pip install --no-cache-dir -U -r proxy/requirements.txt
 

@@ -16,11 +16,12 @@ interface ExtendedSession extends Session {
 }
 
 export default defineConfig({
+  secret: import.meta.env.AUTH_SECRET || (typeof process !== 'undefined' ? process.env.AUTH_SECRET : undefined),
   providers: [
     Auth0({
-      clientId: import.meta.env.AUTH0_CLIENT_ID,
-      clientSecret: import.meta.env.AUTH0_CLIENT_SECRET,
-      issuer: import.meta.env.AUTH0_ISSUER,
+      clientId: import.meta.env.AUTH0_CLIENT_ID || (typeof process !== 'undefined' ? process.env.AUTH0_CLIENT_ID : undefined),
+      clientSecret: import.meta.env.AUTH0_CLIENT_SECRET || (typeof process !== 'undefined' ? process.env.AUTH0_CLIENT_SECRET : undefined),
+      issuer: import.meta.env.AUTH0_ISSUER || (typeof process !== 'undefined' ? process.env.AUTH0_ISSUER : undefined),
       authorization: {
         params: {
           scope: 'openid profile email offline_access',

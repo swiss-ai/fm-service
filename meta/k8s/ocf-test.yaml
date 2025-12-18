@@ -13,8 +13,8 @@ spec:
         app: llm-service-test
     spec:
       containers:
-      - name: global-dispatcher
-        image: ghcr.io/researchcomputer/ocf:amd64-latest
+      - name: global-dispatcher-test
+        image: ghcr.io/researchcomputer/ocf:v0.1.8
         imagePullPolicy: Always
         args:
           - start
@@ -36,6 +36,14 @@ spec:
           limits:
             memory: "16Gi"
             cpu: "8"
+        volumeMounts:
+          - name: test-ocf-key-id
+            mountPath: /root/.ocfcore/keys
+            readOnly: true
+      volumes:
+        - name: test-ocf-key-id
+          secret:
+            secretName: test-dispatcher-id-key
 ---
 apiVersion: v1
 kind: Service
