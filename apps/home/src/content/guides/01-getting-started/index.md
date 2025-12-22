@@ -1,10 +1,10 @@
 ---
-title: "Getting Started"
-description: "Getting Started"
+title: "Getting Started with SP and Local Serving"
+description: "Run models locally with Scratchpad and Ollama"
 date: "Mar 18 2024"
 ---
 
-# Getting Started
+# Getting Started with SP and Local Serving
 
 ## Run your Model Locally
 
