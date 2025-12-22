@@ -12,6 +12,7 @@ import CSCSLogo from "@components/CSCSLogo.astro";
 import { SITE, HOME } from "@consts";
 import { SignIn, SignOut } from 'auth-astro/components';
 import { getSession } from 'auth-astro/server';
+import robAvatar from "@content/images/rob.jpeg";
 
 export const prerender = false;
 const docs = (await getCollection("guides"))
@@ -31,7 +32,7 @@ const contributors = [
   {
     name: "Ilia Badanin",
     role: "Student Engineer",
-    avatar: "https://media.licdn.com/dms/image/v2/D4E03AQFqYhBtxqAAXg/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1719241055758?e=1756339200&v=beta&t=tD0zMCHlMluoTsrCoqCsfz3Z2ZZFfsP3R1PU_TPlH2Q",
+    avatar: "https://media.licdn.com/dms/image/v2/D4E03AQFyjI95QAjeZA/profile-displayphoto-scale_400_400/B4EZlCS9mXHIAg-/0/1757753892848?e=1767830400&v=beta&t=-sl0_LDdsNHMxLte0vibVPahTxToXs-ynLBFmVcFWi0",
     url: "https://ch.linkedin.com/in/ilia-badanin"
   },
   {
@@ -39,6 +40,18 @@ const contributors = [
     role: "Research Associate ",
     avatar: "/images/foto_alex.jpg",
     url: "https://www.linkedin.com/in/alexander-sternfeld-93a01799/"
+  },
+  {
+    name: "Elia Palme",
+    role: "Senior Software Engineer",
+    avatar: "https://www.cscs.ch/fileadmin/user_upload/mycscs_staff/user_179_small.jpg",
+    url: "https://www.cscs.ch/about/staff"
+  },
+  {
+    name: "Robert Matthew Smith",
+    role: "System Expert",
+    avatar: robAvatar.src,
+    url: "#"
   },
   {
     name: "Xiaozhe Yao",

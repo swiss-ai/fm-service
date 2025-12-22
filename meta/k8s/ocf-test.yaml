@@ -18,6 +18,8 @@ spec:
         imagePullPolicy: Always
         args:
           - start
+          # - --bootstrap.addr
+          # - "/ip4/140.238.223.116/tcp/43905/p2p/QmSk2VF9j8bF6Bhw4EFY7bhv74jXi7MTgVBScFwvmTLPGf"
           - --mode
           - "standalone"
           - --seed
