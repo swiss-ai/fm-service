@@ -1,8 +1,14 @@
 ---
-title: "Spin Up Models on Alps"
-description: "Getting Started"
+title: "[ARCHIVED] Spin Up Models on Alps"
+description: "Getting Started (Archived)"
 date: "May 19 2025"
 ---
+
+:::caution[ARCHIVED]
+**These instructions are no longer recommended.**
+
+Please see the [model-launch repository](https://github.com/swiss-ai/model-launch) for up-to-date instructions and examples.
+:::
 
 ## Quick Start
 
