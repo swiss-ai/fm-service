@@ -103,11 +103,10 @@ async def response_generator(response, generation, trace=None, metrics_ctx=None)
                                 usage_data["completionTokens"] = data["usage"]["completion_tokens"]
                             if "total_tokens" in data["usage"]:
                                 usage_data["totalTokens"] = data["usage"]["total_tokens"]
-                            
-                            # Capture token count for metrics if usage is available
+
                             if "completion_tokens" in data["usage"]:
                                 token_count = data["usage"]["completion_tokens"]
-                                
+
                             generation.update(usage=usage_data)
                     yield f"data: {json.dumps(data)}\n\n"
                 except json.JSONDecodeError:
@@ -115,11 +114,10 @@ async def response_generator(response, generation, trace=None, metrics_ctx=None)
     finally:
         full_content = "".join(accumulated_content)
         if trace:
-             trace.update(output=full_content)
+            trace.update(output=full_content)
 
         if generation:
-             generation.update(output=full_content)
-             generation.end()
+            generation.update(output=full_content)
              
         # Record Metrics
         if metrics_ctx and start_time and node_id:
@@ -308,19 +306,13 @@ async def _shared_proxy_handler(
         metadata=trace_metadata
     )
     
-    # Update span attributes
     trace.update(tags=trace_tags)
-    trace.update_trace(user_id=trace_user_id, tags=trace_tags, metadata=trace_metadata)
+    trace.update_trace(
+        user_id=trace_user_id, tags=trace_tags, metadata=trace_metadata)
     
     try:
         generation_meta = trace_metadata.copy()
         generation_meta["user_id"] = trace_user_id
-        
-        # We wrap generation creation and request with propagate_attributes
-        # This ensures headers/context are set during the request.
-        # We rely on the generation object explicitly, so we don't strictly need it to be "current" 
-        # for our own logic, but good for libraries.
-        
         with propagate_attributes(user_id=trace_user_id):
              generation = trace.start_generation(
                  name=generation_name,
@@ -329,7 +321,6 @@ async def _shared_proxy_handler(
                  input=generation_input,
                  metadata=generation_meta
              )
-             
              session = aiohttp.ClientSession()
              try:
                  response = await _execute_http_request(
@@ -343,7 +334,6 @@ async def _shared_proxy_handler(
              except Exception as inner_e:
                  # If request fails, end generation and re-raise
                  generation.update(status_message=str(inner_e), level="ERROR")
-                 generation.end()
                  raise inner_e
 
         # Outside propagate_attributes, response is ready.
@@ -419,11 +409,6 @@ async def _shared_proxy_handler(
             await session.close()
         try:
             generation.update(status_message=str(e), level="ERROR")
-            generation.end()
-        except:
-            pass
-        try:
-            trace.end()
         except:
             pass
         active_requests -= 1

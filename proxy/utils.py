@@ -71,18 +71,12 @@ async def get_langfuse_metrics(query_json: dict, ttl_hash: int = None):
     Fetch metrics from Langfuse with async caching.
     ttl_hash is used to invalidate cache (controlled by caller).
     """
-    # Create a stable key for the dictionary
-    # We sort keys to ensure {a:1, b:2} is same as {b:2, a:1}
     query_str = json.dumps(query_json, sort_keys=True)
     cache_key = (query_str, ttl_hash)
 
     if cache_key in _metrics_cache:
         return _metrics_cache[cache_key]
 
-    # Clean up old keys if ttl_hash changed? 
-    # For simplicity in this step, we just add. 
-    # Ideally we clear cache when ttl_hash changes, but ttl_hash limits scope anyway.
-    
     settings = get_settings()
     encoded_query = urllib.parse.quote(query_str)
     url = f"{settings.langfuse_host}/api/public/v2/metrics?query={encoded_query}"
@@ -93,8 +87,6 @@ async def get_langfuse_metrics(query_json: dict, ttl_hash: int = None):
 
     async with aiohttp.ClientSession() as session:
         async with session.get(url, headers=headers) as resp:
-            resp.raise_for_status()
             data = await resp.json()
-            
     _metrics_cache[cache_key] = data
     return data

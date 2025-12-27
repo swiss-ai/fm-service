@@ -12,9 +12,10 @@ query_json = {
     "fromTimestamp": "2024-01-01T00:00:00Z",
     "toTimestamp": "2024-12-23T00:00:00Z"
 }
+query_str = json.dumps(query_json, sort_keys=True)
 LANGFUSE_PUBLIC_KEY = os.getenv("LANGFUSE_PUBLIC_KEY")
 LANGFUSE_SECRET_KEY = os.getenv("LANGFUSE_SECRET_KEY")
-encoded_query = urllib.parse.quote(json.dumps(query_json))
+encoded_query = urllib.parse.quote(query_str)
 url = f"https://cloud.langfuse.com/api/public/v2/metrics?query={encoded_query}"
 # Basic Auth Header
 auth_s = f"{LANGFUSE_PUBLIC_KEY}:{LANGFUSE_SECRET_KEY}"

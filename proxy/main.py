@@ -248,25 +248,12 @@ async def get_statistics_endpoint(
 @app.post("/v1/metrics")
 async def get_metrics_endpoint(
         request: Request,
-        credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
     ):
-    token = credentials.credentials
-    if not verify_token(engine, token):
-        raise HTTPException(
-            status_code=401,
-            detail="Invalid access token",
-        )
-    
-    try:
-        query_json = await request.json()
-    except Exception:
-        raise HTTPException(status_code=400, detail="Invalid JSON body")
-
+    res = await request.json()
     # Use ttl_hash to cache results for 1 hour
     ttl = get_ttl_hash(seconds=3600)
-    
     try:
-        data = await get_langfuse_metrics(query_json, ttl_hash=ttl)
+        data = await get_langfuse_metrics(res, ttl_hash=ttl)
         return data
     except Exception as e:
         # Log error?
