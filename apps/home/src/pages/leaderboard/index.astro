@@ -31,18 +31,21 @@ try {
     // Transform API response to expected format
     // API returns { data: [ { providedModelName: "...", sum_totalTokens: "..." } ] }
     if (result.data && Array.isArray(result.data)) {
-        tokenData = result.data.reduce((acc, item) => {
-            if (item.providedModelName) {
-                // Parse the token count as an integer
-                acc[item.providedModelName] = parseInt(
-                    item.sum_totalTokens || "0",
-                    10,
-                );
-            }
-            return acc;
-        }, {});
+        tokenData = result.data.reduce(
+            (acc: Record<string, number>, item: any) => {
+                if (item.providedModelName) {
+                    // Parse the token count as an integer
+                    acc[item.providedModelName] = parseInt(
+                        item.sum_totalTokens || "0",
+                        10,
+                    );
+                }
+                return acc;
+            },
+            {},
+        );
     }
-} catch (e) {
+} catch (e: any) {
     console.error("Failed to fetch metrics:", e);
     error = e.message;
 }
