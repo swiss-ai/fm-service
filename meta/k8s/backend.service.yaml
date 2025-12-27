@@ -45,6 +45,8 @@ spec:
               name: serving
           - secretRef:
               name: serving-secrets
+          - secretRef:
+              name: serving-firebase-secret
         resources:
           requests:
             cpu: 2000m

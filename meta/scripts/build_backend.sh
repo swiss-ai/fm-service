@@ -1,5 +1,5 @@
 docker build \
-    --platform linux/amd64,linux/arm64 \
+    --platform linux/amd64 \
     -f meta/dockerfile/backend.Dockerfile \
     -t ghcr.io/xiaozheyao/serving-backend:dev . \
 && docker push ghcr.io/xiaozheyao/serving-backend:dev

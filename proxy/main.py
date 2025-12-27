@@ -9,7 +9,9 @@ from proxy.llm_proxy import llm_proxy, response_generator, llm_proxy_completions
 from proxy.config import get_settings
 from proxy.auth import get_profile_from_accesstoken, get_or_create_apikey, verify_token
 from proxy.provider import get_all_models
-from proxy.utils import get_statistics, get_ttl_hash
+from proxy.utils import get_statistics, get_ttl_hash, get_langfuse_metrics, get_hardware_spec
+from proxy.protocols import LLMRequest, LLMCompletionsRequest
+from proxy.metrics import metrics_collector
 
 engine = None
 settings = get_settings()
@@ -37,6 +39,9 @@ async def lifespan(app: FastAPI):
         settings.database_url,
         pool_pre_ping=True,
     )
+    # Ensure metrics collector initialized (it's a singleton, but good to be explicit/trigger init here)
+    # The singleton __init__ runs only once.
+    MetricsCollector_instance = metrics_collector
     yield
     engine = None
 
@@ -50,9 +55,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# if os.getenv("LOGFIRE_TOKEN", None):
-#     logfire.configure(token=os.getenv("LOGFIRE_TOKEN"))
-#     logfire.instrument_fastapi(app, capture_headers=True)
 
 @app.post("/v1/chat/completions")
 async def chat_completion(
@@ -68,7 +70,9 @@ async def chat_completion(
         )
     
     data = await request.json()
-    data["user_id"] = token
+    # Extract headers for tracking
+    opt_out = request.headers.get("X-OPTOUT-TRACKING", "").lower() in ("true", "1", "yes")
+    app_title = request.headers.get("X-Title", "")
     if 'stream' not in data:
         data['stream'] = False
     if type(data['stream']) == str:
@@ -76,26 +80,36 @@ async def chat_completion(
             data['stream'] = True # convert to boolean
     if data['stream']:
         data['stream_options'] = {"include_usage": True}
+    # Construct LLMRequest
     reorg_data = {'extra_body': {}}
-    
     for k, v in data.items():
         if k in RESERVED_KEYS:
             reorg_data[k] = v
         else:
             reorg_data['extra_body'][k] = v
+
+    llm_request = LLMRequest(
+        user_id=token,
+        opt_out=opt_out,
+        app_title=app_title,
+        **reorg_data
+    )
     
     response = await llm_proxy(
         endpoint=settings.ocf_head_addr+"/v1/service/llm/v1/",
         api_key=token,
-        **reorg_data,
+        request=llm_request,
     )
     if 'stream' in data and data['stream'] == True:
         async def stream_generator():
-            async for chunk in response_generator(response, response.generation):
+            # Pass metrics_ctx if available in response
+            metrics_ctx = getattr(response, "metrics_ctx", None)
+            async for chunk in response_generator(response, response.generation, metrics_ctx=metrics_ctx):
                 yield chunk
         return StreamingResponse(
             stream_generator(),
-            media_type='text/event-stream'
+            media_type='text/event-stream',
+            headers=response.headers
         )
     return response
 
@@ -112,7 +126,11 @@ async def completion(
             detail="Invalid access token",
         )
     data = await request.json()
-    data["user_id"] = token
+    
+    # Extract headers for tracking
+    opt_out = request.headers.get("X-OPTOUT-TRACKING", "").lower() in ("true", "1", "yes")
+    app_title = request.headers.get("X-Title", "")
+
     if 'stream' not in data:
         data['stream'] = False
     if type(data['stream']) == str:
@@ -121,16 +139,36 @@ async def completion(
     if data['stream']:
         data['stream_options'] = {"include_usage": True}
     
+    completion_reserved = [
+        'model', 'prompt', 'stream', 'stream_options', 'max_tokens', 'temperature', 
+        'top_p', 'seed', 'presence_penalty', 'frequency_penalty', 'user_id'
+    ]
+    
+    reorg_data = {'extra_body': {}}
+    for k, v in data.items():
+        if k in completion_reserved:
+            reorg_data[k] = v
+        else:
+            reorg_data['extra_body'][k] = v
+            
+    llm_request = LLMCompletionsRequest(
+        user_id=token,
+        opt_out=opt_out,
+        app_title=app_title,
+        **reorg_data
+    )
+    
     response = await llm_proxy_completions(
         endpoint=settings.ocf_head_addr+"/v1/service/llm/v1/",
         api_key=token,
-        **data,
+        request=llm_request,
     )
     if 'stream' in data and data['stream'] == True:
         async def stream_generator():
-            async for chunk in response_generator(response, response.generation):
+            metrics_ctx = getattr(response, "metrics_ctx", None)
+            async for chunk in response_generator(response, response.generation, metrics_ctx=metrics_ctx):
                 yield chunk
-        return StreamingResponse(stream_generator(), media_type='text/event-stream')
+        return StreamingResponse(stream_generator(), media_type='text/event-stream', headers=response.headers)
     return response
 
 @app.post("/v1/embeddings")
@@ -148,14 +186,19 @@ async def embeddings(
     data = await request.json()
     data["user_id"] = token
     
+    # Extract headers for tracking
+    opt_out = request.headers.get("X-OPTOUT-TRACKING", "").lower() in ("true", "1", "yes")
+    app_title = request.headers.get("X-Title", "")
+    
+    data['opt_out'] = opt_out
+    data['app_title'] = app_title
+    
     response = await llm_proxy_embeddings(
         endpoint=settings.ocf_head_addr+"/v1/service/llm/v1/",
         api_key=token,
         **data,
     )
-    
     return response
-    
     
 @app.get("/v1/models_detailed")
 async def list_models_detailed():
@@ -201,6 +244,33 @@ async def get_statistics_endpoint(
         api_key = None
     stats = get_statistics(api_key, ttl_hash=get_ttl_hash())
     return stats
+
+@app.post("/v1/metrics")
+async def get_metrics_endpoint(
+        request: Request,
+        credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
+    ):
+    token = credentials.credentials
+    if not verify_token(engine, token):
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid access token",
+        )
+    
+    try:
+        query_json = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid JSON body")
+
+    # Use ttl_hash to cache results for 1 hour
+    ttl = get_ttl_hash(seconds=3600)
+    
+    try:
+        data = await get_langfuse_metrics(query_json, ttl_hash=ttl)
+        return data
+    except Exception as e:
+        # Log error?
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     import uvicorn

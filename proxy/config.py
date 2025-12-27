@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     langfuse_secret_key: str
     vite_auth0_client_id: str
     vite_auth0_domain: str
+    firebase_service_account_json: str
     class Config:
         env_file = ".env"
 
