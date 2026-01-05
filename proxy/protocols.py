@@ -9,7 +9,7 @@ def _generate_id():  # private helper function
 
 class LLMRequest(BaseModel):
     model: str
-    messages: List[Dict[str, str]] = []
+    messages: List[Dict[str, Any]] = []
     stream: bool = False
     stream_options: Optional[Dict] = None
     logprobs: bool = False
@@ -36,7 +36,7 @@ class LLMRequest(BaseModel):
 
 class LLMCompletionsRequest(BaseModel):
     model: str
-    prompt: Union[str, List[str]] = ""
+    prompt: Union[str, List[Any]] = ""
     stream: bool = False
     stream_options: Optional[Dict] = None
     max_tokens: Optional[int] = None
