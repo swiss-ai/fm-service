@@ -11,7 +11,10 @@ from proxy.auth import get_profile_from_accesstoken, get_or_create_apikey, verif
 from proxy.provider import get_all_models
 from proxy.utils import get_statistics, get_ttl_hash, get_langfuse_metrics, get_hardware_spec
 from proxy.protocols import LLMRequest, LLMCompletionsRequest
+from functools import lru_cache
+from fastapi.concurrency import run_in_threadpool
 from proxy.metrics import metrics_collector
+from typing import Annotated, Optional
 
 engine = None
 settings = get_settings()
@@ -71,7 +74,7 @@ async def chat_completion(
     
     data = await request.json()
     # Extract headers for tracking
-    opt_out = request.headers.get("X-OPTOUT-TRACKING", "").lower() in ("true", "1", "yes")
+    opt_out = request.headers.get("X-OPTOUT-TRACKING", "false").lower() in ("true", "1", "yes")
     app_title = request.headers.get("X-Title", "")
     if 'stream' not in data:
         data['stream'] = False
@@ -256,9 +259,28 @@ async def get_metrics_endpoint(
         data = await get_langfuse_metrics(res, ttl_hash=ttl)
         return data
     except Exception as e:
-        # Log error?
         raise HTTPException(status_code=500, detail=str(e))
 
+@lru_cache(maxsize=32)
+def get_perf_data(model: Optional[str] = None, ttl_hash: int = None):
+    # This function is cached. ttl_hash argument is used to control cache invalidation.
+    return metrics_collector.get_benchmark_data(model)
+
+@app.get("/v1/perf")
+async def get_perf_endpoint(request: Request):
+    # Use ttl_hash to cache results for 1 hour (or adjusted as per requirement)
+    # Reusing get_ttl_hash which defaults to 24h, let's use 1h like metrics endpoint
+    ttl = get_ttl_hash()
+    
+    # Extract model query param
+    model = request.query_params.get("model")
+    
+    # Run synchronous cached function in threadpool to avoid blocking event loop
+    data = await run_in_threadpool(get_perf_data, model=model, ttl_hash=ttl)
+    return dict(
+        object="list",
+        data=data
+    )
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8080)

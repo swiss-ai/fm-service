@@ -3,7 +3,7 @@ import backoff
 import os
 import aiohttp
 from typing import Dict, Any, Optional, Union, Callable
-from langfuse import Langfuse, propagate_attributes
+from langfuse import get_client, propagate_attributes
 from proxy.protocols import (
     ModelResponse, 
     RetryConstantError, 
@@ -18,11 +18,7 @@ import time
 import asyncio
 from proxy.utils import get_hardware_spec
 
-langfuse = Langfuse(
-    public_key=os.getenv("LANGFUSE_PUBLIC_KEY"),
-    secret_key=os.getenv("LANGFUSE_SECRET_KEY"),
-    host=os.getenv("LANGFUSE_HOST", "https://cloud.langfuse.com")
-)
+langfuse = get_client()
 
 active_requests = 0
 
@@ -98,16 +94,16 @@ async def response_generator(response, generation, trace=None, metrics_ctx=None)
                         if generation:
                             usage_data = {}
                             if "prompt_tokens" in data["usage"]:
-                                usage_data["promptTokens"] = data["usage"]["prompt_tokens"]
+                                usage_data["input"] = data["usage"]["prompt_tokens"]
                             if "completion_tokens" in data["usage"]:
-                                usage_data["completionTokens"] = data["usage"]["completion_tokens"]
+                                usage_data["output"] = data["usage"]["completion_tokens"]
                             if "total_tokens" in data["usage"]:
-                                usage_data["totalTokens"] = data["usage"]["total_tokens"]
+                                usage_data["total"] = data["usage"]["total_tokens"]
 
                             if "completion_tokens" in data["usage"]:
                                 token_count = data["usage"]["completion_tokens"]
 
-                            generation.update(usage=usage_data)
+                            generation.update(usage_details=usage_data)
                     yield f"data: {json.dumps(data)}\n\n"
                 except json.JSONDecodeError:
                     continue
@@ -118,7 +114,11 @@ async def response_generator(response, generation, trace=None, metrics_ctx=None)
 
         if generation:
             generation.update(output=full_content)
+            generation.end()
              
+        if trace:
+            trace.end()
+
         # Record Metrics
         if metrics_ctx and start_time and node_id:
              end_time = time.time()
@@ -301,118 +301,128 @@ async def _shared_proxy_handler(
     # Trace creation using start_span (manual lifecycle to support streaming)
     # Replaces start_as_current_observation context manager to avoid ContextVar token issues across async boundaries.
     
-    trace = langfuse.start_span(
-        name=trace_name,
-        metadata=trace_metadata
-    )
-    
-    trace.update(tags=trace_tags)
-    trace.update_trace(
-        user_id=trace_user_id, tags=trace_tags, metadata=trace_metadata)
-    
-    try:
-        generation_meta = trace_metadata.copy()
-        generation_meta["user_id"] = trace_user_id
-        with propagate_attributes(user_id=trace_user_id):
-             generation = trace.start_generation(
-                 name=generation_name,
-                 model=generation_model,
-                 model_parameters=generation_params,
-                 input=generation_input,
-                 metadata=generation_meta
-             )
-             session = aiohttp.ClientSession()
-             try:
-                 response = await _execute_http_request(
-                     session=session,
-                     url=full_url,
-                     headers=headers,
-                     payload=payload,
-                     stream=stream,
-                     generation=generation
-                 )
-             except Exception as inner_e:
-                 # If request fails, end generation and re-raise
-                 generation.update(status_message=str(inner_e), level="ERROR")
-                 raise inner_e
-
-        # Outside propagate_attributes, response is ready.
+    # Trace creation using start_observation
+    with propagate_attributes(user_id=trace_user_id):
+        span = langfuse.start_observation(
+            name=trace_name,
+            metadata=trace_metadata,
+        )
         
-        node_id = response.headers.get("X-Computing-Node", "unknown") if hasattr(response, "headers") else "unknown"
-        dnt_endpoint = endpoint.split("/service")[0] + "/dnt/table"
-
-        # Update trace tags with hardware spec and X-Title
-        current_metadata = trace_metadata.copy()
-        hardware_spec = get_hardware_spec(node_id, dnt_endpoint)
-        current_metadata["hardware_spec"] = hardware_spec
-        trace.update(metadata=current_metadata)
-        generation.update(metadata=current_metadata)
-        if stream and isinstance(response, StreamWrapper):
-                response.trace_span = trace
-                def cleanup_and_end(**kwargs):
-                    if kwargs:
-                        generation.update(**kwargs)
-                    try:
-                        pass
-                    except:
-                        pass
-                        
-                    generation.update(level="DEFAULT")
-                response.metrics_ctx = {
-                    "start_time": start_time,
-                    "model": generation_model,
-                    "node_id": node_id,
-                    "dnt_endpoint": dnt_endpoint,
-                    "concurrency": snapshot_concurrency
-                }
-                
-                return response
-
-        elif not stream and isinstance(response, ModelResponse):
-                end_time = time.time()
-                latency = end_time - start_time
-                token_count = 0
-                if response.usage:
-                    token_count = response.usage.completion_tokens
-                
-                throughput = token_count / latency if latency > 0 else 0
-                
-                metrics_collector.record(
-                    model=generation_model,
-                    node_id=node_id,
-                    dnt_endpoint=dnt_endpoint,
-                    concurrency=snapshot_concurrency,
-                    ttft=latency,
-                    latency=latency,
-                    throughput=throughput
-                )
-                active_requests -= 1
-
-                update_kwargs = {}
-                if response.usage:
-                    update_kwargs["usage"] = {
-                        "promptTokens": response.usage.prompt_tokens,
-                        "completionTokens": response.usage.completion_tokens,
-                        "totalTokens": response.usage.total_tokens
-                    }
-                if output_extractor:
-                    update_kwargs.update(output_extractor(response))
-                    
-                generation.update(**update_kwargs)
-                if "output" in update_kwargs:
-                     trace.update(output=update_kwargs["output"])
-                
-                return response
-
-    except Exception as e:
-        if 'session' in locals() and not session.closed:
-            await session.close()
+        # Update span with inputs if available? Use update for consistency
+        span.update(metadata=trace_metadata, tags=trace_tags)
+        
         try:
-            generation.update(status_message=str(e), level="ERROR")
-        except:
-            pass
-        active_requests -= 1
-        raise e
+            generation_meta = trace_metadata.copy()
+            generation_meta["user_id"] = trace_user_id
+            generation = span.start_observation(
+                name=generation_name,
+                model=generation_model,
+                model_parameters=generation_params,
+                input=generation_input,
+                metadata=generation_meta,
+                as_type="generation"
+            )
+        
+            session = aiohttp.ClientSession()
+            try:
+                response = await _execute_http_request(
+                    session=session,
+                    url=full_url,
+                    headers=headers,
+                    payload=payload,
+                    stream=stream,
+                    generation=generation
+                )
+            except Exception as inner_e:
+                # If request fails, end generation and re-raise
+                generation.update(status_message=str(inner_e), level="ERROR")
+                generation.end()
+                span.end()
+                raise inner_e
+
+            # Outside propagate_attributes, response is ready.
+            
+            node_id = response.headers.get("X-Computing-Node", "unknown") if hasattr(response, "headers") else "unknown"
+            dnt_endpoint = endpoint.split("/service")[0] + "/dnt/table"
+
+            # Update trace tags with hardware spec and X-Title
+            current_metadata = trace_metadata.copy()
+            hardware_spec = get_hardware_spec(node_id, dnt_endpoint)
+            current_metadata["hardware_spec"] = hardware_spec
+            span.update(metadata=current_metadata)
+            generation.update(metadata=current_metadata)
+            if stream and isinstance(response, StreamWrapper):
+                    response.trace_span = span
+                    def cleanup_and_end(**kwargs):
+                        if kwargs:
+                            generation.update(**kwargs)
+                        try:
+                            pass
+                        except:
+                            pass
+                            
+                        generation.update(level="DEFAULT")
+                    response.metrics_ctx = {
+                        "start_time": start_time,
+                        "model": generation_model,
+                        "node_id": node_id,
+                        "dnt_endpoint": dnt_endpoint,
+                        "concurrency": snapshot_concurrency
+                    }
+                    
+                    return response
+
+            elif not stream and isinstance(response, ModelResponse):
+                    end_time = time.time()
+                    latency = end_time - start_time
+                    token_count = 0
+                    if response.usage:
+                        token_count = response.usage.completion_tokens
+                    
+                    throughput = token_count / latency if latency > 0 else 0
+                    
+                    metrics_collector.record(
+                        model=generation_model,
+                        node_id=node_id,
+                        dnt_endpoint=dnt_endpoint,
+                        concurrency=snapshot_concurrency,
+                        ttft=latency,
+                        latency=latency,
+                        throughput=throughput
+                    )
+                    active_requests -= 1
+
+                    update_kwargs = {}
+                    if response.usage:
+                        update_kwargs["usage_details"] = {
+                            "input": response.usage.prompt_tokens,
+                            "output": response.usage.completion_tokens,
+                            "total": response.usage.total_tokens
+                        }
+                    if output_extractor:
+                        update_kwargs.update(output_extractor(response))
+                        
+                    generation.update(**update_kwargs)
+                    if "output" in update_kwargs:
+                         span.update(output=update_kwargs["output"])
+                    
+                    generation.end()
+                    span.end()
+                    return response
+
+        except Exception as e:
+            if 'session' in locals() and not session.closed:
+                await session.close()
+            try:
+                if 'generation' in locals():
+                    generation.update(status_message=str(e), level="ERROR")
+                    generation.end()
+                if 'span' in locals():
+                    span.end()
+            except:
+                pass
+            active_requests -= 1
+            raise e
 
 @backoff.on_exception(
     wait_gen=backoff.constant,

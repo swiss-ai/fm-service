@@ -192,5 +192,28 @@ class MetricsCollector:
         except Exception as e:
             logger.error(f"Error syncing to Firestore: {e}")
 
+    def get_benchmark_data(self, model: Optional[str] = None) -> list[Dict[str, Any]]:
+        if not self.db:
+            return []
+        
+        try:
+            ref = self.db.collection("llm_benchmarks")
+            if model:
+                # Note: This might require a composite index if combined with other filters, 
+                # but for single field it should be fine or prompts for index creation.
+                query = ref.where("model", "==", model)
+                docs = query.stream()
+            else:
+                docs = ref.stream()
+            
+            results = []
+            for doc in docs:
+                data = doc.to_dict()
+                results.append(data)
+            return results
+        except Exception as e:
+            logger.error(f"Error fetching benchmark data: {e}")
+            return []
+
 # Global singleton
 metrics_collector = MetricsCollector()
