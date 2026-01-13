@@ -210,7 +210,6 @@ async def _execute_http_request(
         finally:
             await req_cm.__aexit__(None, None, None)
             await session.close()
-        
         model_response = ModelResponse(**data)
         model_response.headers = response_headers
         return model_response
@@ -522,7 +521,6 @@ async def llm_proxy_completions(endpoint, api_key, request: LLMCompletionsReques
     factor=1.5,
 )
 async def llm_proxy_embeddings(endpoint, api_key, **kwargs) -> ModelResponse:
-    # Construct payload manually from kwargs as before
     embedding_params = {
         'model': kwargs.get('model'),
         'input': kwargs.get('input', []),
@@ -543,7 +541,7 @@ async def llm_proxy_embeddings(endpoint, api_key, **kwargs) -> ModelResponse:
         headers_extra={},
         stream=False,
         opt_out=kwargs.get('opt_out', False),
-        full_url=endpoint, 
+        full_url=endpoint .rstrip('/') + "/embeddings", 
         trace_name="embeddings-generation",
         trace_user_id=user_id,
         trace_tags=kwargs.get('tags', []),

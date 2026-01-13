@@ -2,7 +2,10 @@ import json
 import uuid
 import time
 from typing import Dict, List, Literal, Optional, Union, Any
-from pydantic import BaseModel, Field
+from typing import Dict, List, Literal, Optional, Union, Any
+import base64
+import struct
+from pydantic import BaseModel, Field, field_validator
 
 def _generate_id():  # private helper function
     return "chatcmpl-" + str(uuid.uuid4())
@@ -225,7 +228,23 @@ class StreamingChoices(BaseModel):
 
     def __setitem__(self, key, value):
         setattr(self, key, value)
-        
+
+class EmbeddingObject(BaseModel):
+    object: Literal["embedding"] = "embedding"
+    embedding: List[float]
+    index: int = 0
+
+    @field_validator('embedding', mode='before')
+    @classmethod
+    def decode_base64_embedding(cls, v):
+        if isinstance(v, str):
+            # Base64 string to list of floats
+            # Assuming little-endian float32 as is common with OpenAI compatible APIs
+            byte_data = base64.b64decode(v)
+            count = len(byte_data) // 4
+            return list(struct.unpack(f'<{count}f', byte_data))
+        return v
+
 class ModelResponse(BaseModel):
     id: str = Field(default_factory=_generate_id)
     choices: List[Union[Choices, StreamingChoices]] = Field(default_factory=lambda: [Choices()])
@@ -236,6 +255,7 @@ class ModelResponse(BaseModel):
     raw_prompt: Optional[str] = None
     raw_output: Optional[str] = None
     usage: Optional[Usage] = None
+    data: Optional[List[EmbeddingObject]] = None
     
     _hidden_params: dict = {}
     
