@@ -267,15 +267,15 @@ const sponsors = [
             Powered by Switzerland's leading research institutions
           </p>
         </div>
-        <div class="card p-12">
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-12 items-center justify-items-center">
+        <div class="card p-6 md:p-12">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-12 items-center justify-items-center">
             {sponsors.map(sponsor => (
               sponsor.component ? (
-                <div class="opacity-70 hover:opacity-100 transition-opacity duration-300 transform hover:scale-105">
+                <div class="w-44 h-24 md:w-48 md:h-24 flex items-center justify-center opacity-70 dark:opacity-100 hover:opacity-100 dark:bg-slate-50 dark:rounded-lg dark:p-6 transition-all duration-500 ease-out transform hover:scale-105">
                   <sponsor.component class="h-16 w-auto object-contain" width={158} height={48} />
                 </div>
               ) : (
-                <div class="opacity-70 hover:opacity-100 transition-opacity duration-300 transform hover:scale-105">
+                <div class="w-44 h-24 md:w-48 md:h-24 flex items-center justify-center opacity-70 dark:opacity-100 hover:opacity-100 dark:bg-slate-50 dark:rounded-lg dark:p-6 transition-all duration-500 ease-out transform hover:scale-105">
                   <SponsorCard {...sponsor} />
                 </div>
               )
