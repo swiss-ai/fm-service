@@ -39,15 +39,15 @@
 href=https://huggingface.co/{entry.data.title}
 class="relative group flex flex-nowrap py-3 px-4 pr-10 rounded-lg border border-black/15 dark:border-white/20 hover:bg-black/5 dark:hover:bg-white/5 hover:text-black dark:hover:text-white transition-colors duration-300 ease-in-out"
 >
-<div class="flex items-center gap-3">
+<div class="flex items-center gap-3 min-w-0">
   <img src={logoUrl} alt="Model logo" class="w-8 h-8 object-contain" />
-  <div class="flex flex-col flex-1 truncate">
-    <div class="font-semibold flex items-center gap-2">
+  <div class="flex flex-col flex-1 min-w-0">
+    <div class="font-semibold flex items-center gap-2 min-w-0">
       <span
         on:click={copyModelName}
         role="button"
         tabindex="0"
-        class="inline-block cursor-pointer font-mono {copied ? 'animate-name-flash' : ''}"
+        class="inline-block cursor-pointer break-all {copied ? 'animate-name-flash' : ''}"
         title="Click to copy model name"
       >
         {entry.data.title}
@@ -55,7 +55,7 @@ class="relative group flex flex-nowrap py-3 px-4 pr-10 rounded-lg border border-
       <button
         on:click={copyModelName}
         title="Copy model name"
-        class="inline-flex items-center justify-center p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors {copied ? 'animate-check-bounce' : ''}"
+        class="inline-flex items-center justify-center p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors {copied ? 'animate-check-bounce' : ''} flex-shrink-0"
       >
         {#if copied}
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-500">
