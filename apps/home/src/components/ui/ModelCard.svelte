@@ -17,6 +17,22 @@
   
   // Get the logo URL for this model
   const logoUrl = getModelLogo(entry.data.title);
+
+  let copied = false;
+
+  async function copyModelName(e: Event) {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      await navigator.clipboard.writeText(entry.data.title);
+      copied = true;
+      setTimeout(() => {
+        copied = false;
+      }, 1200);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  }
 </script>
 
 <a
@@ -26,7 +42,32 @@ class="relative group flex flex-nowrap py-3 px-4 pr-10 rounded-lg border border-
 <div class="flex items-center gap-3">
   <img src={logoUrl} alt="Model logo" class="w-8 h-8 object-contain" />
   <div class="flex flex-col flex-1 truncate">
-    <div class="font-semibold">{entry.data.title}
+    <div class="font-semibold flex items-center gap-2">
+      <span
+        on:click={copyModelName}
+        role="button"
+        tabindex="0"
+        class="inline-block cursor-pointer font-mono {copied ? 'animate-name-flash' : ''}"
+        title="Click to copy model name"
+      >
+        {entry.data.title}
+      </span>
+      <button
+        on:click={copyModelName}
+        title="Copy model name"
+        class="inline-flex items-center justify-center p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors {copied ? 'animate-check-bounce' : ''}"
+      >
+        {#if copied}
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-500">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        {:else}
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+        {/if}
+      </button>
       {#if entry.data.instanceCount > 1}
         <span class="instance-count" title="Number of launched instances for higher throughput">
           x{entry.data.instanceCount}
@@ -61,5 +102,40 @@ class="relative group flex flex-nowrap py-3 px-4 pr-10 rounded-lg border border-
     font-weight: bold;
     padding: 0 6px;
     border-radius: 4px;
+  }
+
+  @keyframes check-bounce {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.4);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  :global(.animate-check-bounce) {
+    animation: check-bounce 0.6s ease-in-out;
+  }
+
+  @keyframes name-flash {
+    0% {
+      color: inherit;
+      transform: scale(1);
+    }
+    40% {
+      color: #4f46e5;
+      transform: scale(0.98);
+    }
+    100% {
+      color: inherit;
+      transform: scale(1);
+    }
+  }
+
+  .animate-name-flash {
+    animation: name-flash 1s ease-in-out;
   }
 </style>
