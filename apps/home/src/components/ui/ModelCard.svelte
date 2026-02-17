@@ -47,7 +47,7 @@ class="relative group flex flex-nowrap py-3 px-4 pr-10 rounded-lg border border-
         on:click={copyModelName}
         role="button"
         tabindex="0"
-        class="inline-block cursor-pointer break-all {copied ? 'animate-name-flash' : ''}"
+        class="inline-block cursor-pointer break-all font-mono {copied ? 'animate-name-flash' : ''}"
         title="Click to copy model name"
       >
         {entry.data.title}
