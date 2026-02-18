@@ -26,6 +26,7 @@
 // Map of organization names to their logos
 const orgLogos: Record<string, string | null> = {
   'swissai': "https://avatars.githubusercontent.com/u/153931663?s=200",
+  'swiss-ai': "https://avatars.githubusercontent.com/u/153931663?s=200",
   'bigscience': 'https://cdn-avatars.huggingface.co/v1/production/uploads/1634806038075-5df7e9e5da6d0311fd3d53f9.png',
   'CohereLabs': 'https://cdn-avatars.huggingface.co/v1/production/uploads/1678549441248-5e70f6048ce3c604d78fe133.png',
   'microsoft': 'https://cdn-avatars.huggingface.co/v1/production/uploads/1583646260758-5e64858c87403103f9f1055d.png',
@@ -35,7 +36,10 @@ const orgLogos: Record<string, string | null> = {
   'google': 'https://cdn-avatars.huggingface.co/v1/production/uploads/5dd96eb166059660ed1ee413/WtA3YYitedOr9n02eHfJe.png',
   'meta-llama': 'https://cdn-avatars.huggingface.co/v1/production/uploads/646cf8084eefb026fb8fd8bc/oCTqufkdTkjyGodsx1vo1.png',
   'deepseek-ai': 'https://cdn-avatars.huggingface.co/v1/production/uploads/6538815d1bdb3c40db94fbfa/xMBly9PUMphrFVMxLX4kq.png',
-  'hf': 'https://huggingface.co/front/assets/huggingface_logo-noborder.svg'
+  'hf': 'https://huggingface.co/front/assets/huggingface_logo-noborder.svg',
+  'openai': 'https://cdn-avatars.huggingface.co/v1/production/uploads/68783facef79a05727260de3/UPX5RQxiPGA-ZbBmArIKq.png',
+  'Snowflake': 'https://cdn-avatars.huggingface.co/v1/production/uploads/64dc52cf858f8a41c12fc819/O9-MWzRjWzbNP_DQlMb-7.png',
+  'zai-org': 'https://cdn-avatars.huggingface.co/v1/production/uploads/62dc173789b4cf157d36ebee/i_pxzM2ZDo3Ub-BEgIkE9.png'
 };
 
 // Specific model mappings for arena data and custom models
