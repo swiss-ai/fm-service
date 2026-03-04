@@ -107,7 +107,7 @@ async def chat_completion(
         async def stream_generator():
             # Pass metrics_ctx if available in response
             metrics_ctx = getattr(response, "metrics_ctx", None)
-            async for chunk in response_generator(response, response.generation, metrics_ctx=metrics_ctx):
+            async for chunk in response_generator(response, metrics_ctx=metrics_ctx):
                 yield chunk
         return StreamingResponse(
             stream_generator(),
@@ -169,7 +169,7 @@ async def completion(
     if 'stream' in data and data['stream'] == True:
         async def stream_generator():
             metrics_ctx = getattr(response, "metrics_ctx", None)
-            async for chunk in response_generator(response, response.generation, metrics_ctx=metrics_ctx):
+            async for chunk in response_generator(response, metrics_ctx=metrics_ctx):
                 yield chunk
         return StreamingResponse(stream_generator(), media_type='text/event-stream', headers=response.headers)
     return response

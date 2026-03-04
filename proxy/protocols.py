@@ -259,9 +259,6 @@ class ModelResponse(BaseModel):
     
     _hidden_params: dict = {}
     
-    # We add generation field for Langfuse
-    generation: Optional[Any] = None
-    
     # Validation headers from upstream
     headers: Optional[Dict[str, str]] = None
 
