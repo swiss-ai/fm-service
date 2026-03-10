@@ -9,7 +9,7 @@ check:
 	ruff format --check backend/
 
 test:
-	pytest tests/ -v
+	pytest backend/tests/ -v
 
 dev:
 	uvicorn backend.main:app --reload --host 0.0.0.0 --port 8080
