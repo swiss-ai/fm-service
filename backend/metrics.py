@@ -16,7 +16,7 @@ try:
 except ImportError:
     FIREBASE_AVAILABLE = False
 
-from proxy.utils import get_hardware_spec
+from backend.utils import get_hardware_spec
 
 logger = logging.getLogger(__name__)
 

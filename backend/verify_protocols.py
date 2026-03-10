@@ -1,5 +1,5 @@
 
-from proxy.protocols import LLMRequest, LLMCompletionsRequest
+from backend.protocols import LLMRequest, LLMCompletionsRequest
 import yaml
 import json
 

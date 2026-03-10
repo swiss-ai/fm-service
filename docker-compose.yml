@@ -2,7 +2,7 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: meta/dockerfile/backend.Dockerfile
     ports:
       - "8080:8080"
     depends_on:

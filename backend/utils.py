@@ -8,7 +8,7 @@ import aiohttp
 from typing import Optional
 from functools import lru_cache
 import time
-from proxy.config import parse_hardware_info, get_settings
+from backend.config import parse_hardware_info, get_settings
 
 logger = logging.getLogger(__name__)
 

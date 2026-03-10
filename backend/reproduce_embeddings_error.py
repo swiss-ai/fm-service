@@ -2,8 +2,8 @@
 import asyncio
 import json
 from unittest.mock import MagicMock, AsyncMock, patch
-from proxy.llm_proxy import llm_proxy_embeddings
-from proxy.protocols import ModelResponse
+from backend.llm_proxy import llm_proxy_embeddings
+from backend.protocols import ModelResponse
 
 # Mock response data for embeddings
 EMBEDDINGS_RESPONSE = {

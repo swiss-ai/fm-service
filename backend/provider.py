@@ -1,5 +1,5 @@
 import requests
-from proxy.config import parse_hardware_info
+from backend.config import parse_hardware_info
 
 def get_all_models(endpoint: str, with_details: bool=False):
     available_models = []

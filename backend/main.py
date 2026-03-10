@@ -5,15 +5,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, HTTPException, Depends, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.responses import StreamingResponse
-from proxy.llm_proxy import llm_proxy, response_generator, llm_proxy_completions, llm_proxy_embeddings
-from proxy.config import get_settings
-from proxy.auth import get_profile_from_accesstoken, get_or_create_apikey, verify_token
-from proxy.provider import get_all_models
-from proxy.utils import get_statistics, get_ttl_hash, get_langfuse_metrics, get_hardware_spec
-from proxy.protocols import LLMRequest, LLMCompletionsRequest
+from backend.llm_proxy import llm_proxy, response_generator, llm_proxy_completions, llm_proxy_embeddings
+from backend.config import get_settings
+from backend.auth import get_profile_from_accesstoken, get_or_create_apikey, verify_token
+from backend.provider import get_all_models
+from backend.utils import get_statistics, get_ttl_hash, get_langfuse_metrics, get_hardware_spec
+from backend.protocols import LLMRequest, LLMCompletionsRequest
 from functools import lru_cache
 from fastapi.concurrency import run_in_threadpool
-from proxy.metrics import metrics_collector
+from backend.metrics import metrics_collector
 from typing import Annotated, Optional
 
 engine = None

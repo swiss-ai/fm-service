@@ -7,15 +7,15 @@ import os
 # Add proxy parent dir to path so we can import proxy modules
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from proxy.llm_proxy import llm_proxy, llm_proxy_completions, llm_proxy_embeddings
-from proxy.protocols import ModelResponse, Choices, Message, Usage
+from backend.llm_proxy import llm_proxy, llm_proxy_completions, llm_proxy_embeddings
+from backend.protocols import ModelResponse, Choices, Message, Usage
 
 async def test_llm_proxy_tracking():
     print("Testing llm_proxy tracking...")
     
     # Mock dependencies
-    with patch("proxy.llm_proxy._execute_http_request", new_callable=AsyncMock) as mock_execute, \
-         patch("proxy.llm_proxy.langfuse") as mock_langfuse:
+    with patch("backend.llm_proxy._execute_http_request", new_callable=AsyncMock) as mock_execute, \
+         patch("backend.llm_proxy.langfuse") as mock_langfuse:
         
         # Setup _execute_http_request mock
         mock_response = ModelResponse(
@@ -75,8 +75,8 @@ async def test_llm_proxy_tracking():
 async def test_llm_proxy_opt_out():
     print("Testing llm_proxy opt_out...")
     
-    with patch("proxy.llm_proxy._execute_http_request", new_callable=AsyncMock) as mock_execute, \
-         patch("proxy.llm_proxy.langfuse") as mock_langfuse:
+    with patch("backend.llm_proxy._execute_http_request", new_callable=AsyncMock) as mock_execute, \
+         patch("backend.llm_proxy.langfuse") as mock_langfuse:
         
         mock_response = ModelResponse(choices=[])
         mock_execute.return_value = mock_response

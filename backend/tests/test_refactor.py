@@ -8,15 +8,15 @@ import json
 # Add project root to path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 
-from proxy.llm_proxy import llm_proxy
-from proxy.protocols import LLMRequest
+from backend.llm_proxy import llm_proxy
+from backend.protocols import LLMRequest
 
 async def test_llm_proxy_tracking():
     print("Testing llm_proxy tracking with aiohttp...")
     
     # Mock dependencies
     with patch("aiohttp.ClientSession") as MockSession, \
-         patch("proxy.llm_proxy.langfuse") as mock_langfuse:
+         patch("backend.llm_proxy.langfuse") as mock_langfuse:
         
         # Setup session mock
         mock_session = MagicMock()
@@ -91,7 +91,7 @@ async def test_llm_proxy_opt_out():
     print("Testing llm_proxy opt_out...")
     
     with patch("aiohttp.ClientSession") as MockSession, \
-         patch("proxy.llm_proxy.langfuse") as mock_langfuse:
+         patch("backend.llm_proxy.langfuse") as mock_langfuse:
         
         mock_session = MagicMock()
         MockSession.return_value = mock_session

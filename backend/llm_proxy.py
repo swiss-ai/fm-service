@@ -3,7 +3,8 @@ import backoff
 import os
 import aiohttp
 from typing import Dict, Any, Optional, Union, Callable
-from proxy.protocols import (
+from langfuse import get_client, propagate_attributes
+from backend.protocols import (
     ModelResponse, 
     RetryConstantError, 
     RetryExpoError, 
@@ -12,10 +13,10 @@ from proxy.protocols import (
     LLMRequest,
     LLMCompletionsRequest,
 )
-from proxy.metrics import metrics_collector
+from backend.metrics import metrics_collector
 import time
 import asyncio
-from proxy.utils import get_hardware_spec
+from backend.utils import get_hardware_spec
 
 active_requests = 0
 
