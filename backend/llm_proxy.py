@@ -1,44 +1,40 @@
 import json
 import backoff
-import os
 import aiohttp
-from typing import Dict, Any, Optional, Union, Callable
-from langfuse import get_client, propagate_attributes
+from typing import Dict, Union
 from backend.protocols import (
-    ModelResponse, 
-    RetryConstantError, 
-    RetryExpoError, 
+    ModelResponse,
+    RetryConstantError,
+    RetryExpoError,
     UnknownLLMError,
-    LLMRequest,
     LLMRequest,
     LLMCompletionsRequest,
 )
 from backend.metrics import metrics_collector
 import time
-import asyncio
-from backend.utils import get_hardware_spec
 
 active_requests = 0
+
 
 async def response_generator(response, metrics_ctx=None):
     accumulated_content = []
     has_started_content = False
     first_token_time = None
     token_count = 0
-    
+
     # Unpack metrics context
     start_time = None
     model = None
     node_id = None
     dnt_endpoint = None
     concurrency = 0
-    
+
     if metrics_ctx:
-        start_time = metrics_ctx.get('start_time')
-        model = metrics_ctx.get('model')
-        node_id = metrics_ctx.get('node_id')
-        dnt_endpoint = metrics_ctx.get('dnt_endpoint')
-        concurrency = metrics_ctx.get('concurrency')
+        start_time = metrics_ctx.get("start_time")
+        model = metrics_ctx.get("model")
+        node_id = metrics_ctx.get("node_id")
+        dnt_endpoint = metrics_ctx.get("dnt_endpoint")
+        concurrency = metrics_ctx.get("concurrency")
 
     try:
         # response is now an aiohttp Stream or similar
@@ -47,7 +43,7 @@ async def response_generator(response, metrics_ctx=None):
             if not line:
                 continue
             if line.startswith(b"data: "):
-                data_str = line[6:].decode('utf-8')
+                data_str = line[6:].decode("utf-8")
                 if data_str == "[DONE]":
                     continue
                 try:
@@ -69,7 +65,7 @@ async def response_generator(response, metrics_ctx=None):
                                 choice["delta"]["content"] = processed_content
                                 if processed_content:
                                     accumulated_content.append(processed_content)
-                                    
+
                         # Handle Legacy Completion (text)
                         elif "text" in choice:
                             original_content = choice["text"]
@@ -95,47 +91,51 @@ async def response_generator(response, metrics_ctx=None):
     finally:
         # Record Metrics
         if metrics_ctx and start_time and node_id:
-             full_content = "".join(accumulated_content)
-             end_time = time.time()
-             latency = end_time - start_time
-             ttft = (first_token_time - start_time) if first_token_time else latency
-             
-             # If we didn't get usage data, estimate from content length
-             if token_count == 0 and full_content:
-                 token_count = len(full_content) / 4.0 # Crude approximation
-             
-             throughput = token_count / latency if latency > 0 else 0
-             
-             metrics_collector.record(
-                 model=model,
-                 node_id=node_id,
-                 dnt_endpoint=dnt_endpoint,
-                 concurrency=concurrency,
-                 ttft=ttft,
-                 latency=latency,
-                 throughput=throughput
-             )
-        
+            full_content = "".join(accumulated_content)
+            end_time = time.time()
+            latency = end_time - start_time
+            ttft = (first_token_time - start_time) if first_token_time else latency
+
+            # If we didn't get usage data, estimate from content length
+            if token_count == 0 and full_content:
+                token_count = len(full_content) / 4.0  # Crude approximation
+
+            throughput = token_count / latency if latency > 0 else 0
+
+            metrics_collector.record(
+                model=model,
+                node_id=node_id,
+                dnt_endpoint=dnt_endpoint,
+                concurrency=concurrency,
+                ttft=ttft,
+                latency=latency,
+                throughput=throughput,
+            )
+
         global active_requests
         active_requests -= 1
+
 
 def handle_llm_exception(e: Exception):
     if isinstance(e, aiohttp.ClientResponseError):
         if e.status in [408, 429, 500, 502, 503, 504]:
-             raise RetryExpoError(f"HTTP {e.status}: {e.message}") from e
+            raise RetryExpoError(f"HTTP {e.status}: {e.message}") from e
         else:
-             raise RetryConstantError(f"HTTP {e.status}: {e.message}") from e
+            raise RetryConstantError(f"HTTP {e.status}: {e.message}") from e
     elif isinstance(e, (aiohttp.ClientError, aiohttp.ServerTimeoutError)):
-         raise RetryConstantError(str(e)) from e
+        raise RetryConstantError(str(e)) from e
     else:
         raise UnknownLLMError from e
+
 
 class StreamWrapper:
     def __init__(self, gen, headers=None):
         self.gen = gen
         self.headers = headers
+
     def __aiter__(self):
         return self.gen
+
 
 async def _execute_http_request(
     session: aiohttp.ClientSession,
@@ -154,19 +154,20 @@ async def _execute_http_request(
     if resp.status >= 400:
         try:
             text = await resp.text()
-        except:
+        except Exception:
             text = str(resp.status)
         await req_cm.__aexit__(None, None, None)
         await session.close()
-        
+
         if resp.status in [429, 500, 502, 503, 504]:
-             raise RetryExpoError(f"HTTP {resp.status}: {text}")
+            raise RetryExpoError(f"HTTP {resp.status}: {text}")
         else:
-             raise RetryConstantError(f"HTTP {resp.status}: {text}")
-             
+            raise RetryConstantError(f"HTTP {resp.status}: {text}")
+
     # Capture headers
     response_headers = dict(resp.headers)
     if stream:
+
         async def wrapped_content():
             try:
                 async for chunk in resp.content:
@@ -174,6 +175,7 @@ async def _execute_http_request(
             finally:
                 await req_cm.__aexit__(None, None, None)
                 await session.close()
+
         return StreamWrapper(wrapped_content(), headers=response_headers)
     else:
         try:
@@ -184,6 +186,7 @@ async def _execute_http_request(
         model_response = ModelResponse(**data)
         model_response.headers = response_headers
         return model_response
+
 
 async def _shared_proxy_handler(
     endpoint: str,
@@ -199,12 +202,9 @@ async def _shared_proxy_handler(
     start_time = time.time()
     snapshot_concurrency = active_requests
 
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json"
-    }
+    headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
     headers.update(headers_extra)
-    
+
     session = aiohttp.ClientSession()
     try:
         resp = await _execute_http_request(
@@ -214,39 +214,43 @@ async def _shared_proxy_handler(
             payload=payload,
             stream=stream,
         )
-        node_id = resp.headers.get("X-Computing-Node", "unknown") if hasattr(resp, "headers") else "unknown"
+        node_id = (
+            resp.headers.get("X-Computing-Node", "unknown")
+            if hasattr(resp, "headers")
+            else "unknown"
+        )
         dnt_endpoint = endpoint.split("/service")[0] + "/dnt/table"
         if stream and isinstance(resp, StreamWrapper):
-             resp.metrics_ctx = {
-                 "start_time": start_time,
-                 "model": model, 
-                 "node_id": node_id,
-                 "dnt_endpoint": dnt_endpoint,
-                 "concurrency": snapshot_concurrency
-             }
-                 
+            resp.metrics_ctx = {
+                "start_time": start_time,
+                "model": model,
+                "node_id": node_id,
+                "dnt_endpoint": dnt_endpoint,
+                "concurrency": snapshot_concurrency,
+            }
+
         else:
-             # Non-streaming
-             end_time = time.time()
-             latency = end_time - start_time
-             
-             token_count = 0
-             if isinstance(resp, ModelResponse) and resp.usage:
-                 token_count = resp.usage.completion_tokens
-             
-             throughput = token_count / latency if latency > 0 else 0
-             
-             metrics_collector.record(
-                 model=model,
-                 node_id=node_id,
-                 dnt_endpoint=dnt_endpoint,
-                 concurrency=snapshot_concurrency,
-                 ttft=latency, # TTFT = Latency for non-stream
-                 latency=latency,
-                 throughput=throughput
-             )
-             active_requests -= 1
-        
+            # Non-streaming
+            end_time = time.time()
+            latency = end_time - start_time
+
+            token_count = 0
+            if isinstance(resp, ModelResponse) and resp.usage:
+                token_count = resp.usage.completion_tokens
+
+            throughput = token_count / latency if latency > 0 else 0
+
+            metrics_collector.record(
+                model=model,
+                node_id=node_id,
+                dnt_endpoint=dnt_endpoint,
+                concurrency=snapshot_concurrency,
+                ttft=latency,  # TTFT = Latency for non-stream
+                latency=latency,
+                throughput=throughput,
+            )
+            active_requests -= 1
+
         return resp
 
     except Exception as e:
@@ -254,6 +258,7 @@ async def _shared_proxy_handler(
         if not session.closed:
             await session.close()
         handle_llm_exception(e)
+
 
 @backoff.on_exception(
     wait_gen=backoff.constant,
@@ -275,9 +280,10 @@ async def llm_proxy(endpoint, api_key, request: LLMRequest) -> ModelResponse:
         payload=request.to_payload(),
         headers_extra={},
         stream=request.stream,
-        full_url=endpoint.rstrip('/') + "/chat/completions",
+        full_url=endpoint.rstrip("/") + "/chat/completions",
         model=request.model,
     )
+
 
 @backoff.on_exception(
     wait_gen=backoff.constant,
@@ -292,16 +298,19 @@ async def llm_proxy(endpoint, api_key, request: LLMRequest) -> ModelResponse:
     max_value=100,
     factor=1.5,
 )
-async def llm_proxy_completions(endpoint, api_key, request: LLMCompletionsRequest) -> ModelResponse:
+async def llm_proxy_completions(
+    endpoint, api_key, request: LLMCompletionsRequest
+) -> ModelResponse:
     return await _shared_proxy_handler(
         endpoint=endpoint,
         api_key=api_key,
         payload=request.to_payload(),
         headers_extra={},
         stream=request.stream,
-        full_url=endpoint.rstrip('/') + "/completions",
+        full_url=endpoint.rstrip("/") + "/completions",
         model=request.model,
     )
+
 
 @backoff.on_exception(
     wait_gen=backoff.constant,
@@ -318,21 +327,21 @@ async def llm_proxy_completions(endpoint, api_key, request: LLMCompletionsReques
 )
 async def llm_proxy_embeddings(endpoint, api_key, **kwargs) -> ModelResponse:
     embedding_params = {
-        'model': kwargs.get('model'),
-        'input': kwargs.get('input', []),
-        'encoding_format': kwargs.get('encoding_format', 'float'),
+        "model": kwargs.get("model"),
+        "input": kwargs.get("input", []),
+        "encoding_format": kwargs.get("encoding_format", "float"),
     }
-    if kwargs.get('dimensions') is not None:
-        embedding_params['dimensions'] = kwargs.get('dimensions')
-    if kwargs.get('user') is not None:
-        embedding_params['user'] = kwargs.get('user')
-        
+    if kwargs.get("dimensions") is not None:
+        embedding_params["dimensions"] = kwargs.get("dimensions")
+    if kwargs.get("user") is not None:
+        embedding_params["user"] = kwargs.get("user")
+
     return await _shared_proxy_handler(
         endpoint=endpoint,
         api_key=api_key,
         payload=embedding_params,
         headers_extra={},
         stream=False,
-        full_url=endpoint.rstrip('/') + "/embeddings",
-        model=kwargs.get('model'),
+        full_url=endpoint.rstrip("/") + "/embeddings",
+        model=kwargs.get("model"),
     )

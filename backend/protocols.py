@@ -2,13 +2,14 @@ import json
 import uuid
 import time
 from typing import Dict, List, Literal, Optional, Union, Any
-from typing import Dict, List, Literal, Optional, Union, Any
 import base64
 import struct
 from pydantic import BaseModel, Field, field_validator
 
+
 def _generate_id():  # private helper function
     return "chatcmpl-" + str(uuid.uuid4())
+
 
 class LLMRequest(BaseModel):
     model: str
@@ -24,7 +25,7 @@ class LLMRequest(BaseModel):
     presence_penalty: float = 0.0
     frequency_penalty: float = 0.0
     extra_body: Dict = {}
-    
+
     # Tracking fields
     user_id: str = ""
     opt_out: bool = False
@@ -33,9 +34,12 @@ class LLMRequest(BaseModel):
 
     def to_payload(self) -> Dict:
         """Convert to payload for the LLM API"""
-        data = self.model_dump(exclude={'user_id', 'opt_out', 'app_title', 'tags', 'extra_body'})
+        data = self.model_dump(
+            exclude={"user_id", "opt_out", "app_title", "tags", "extra_body"}
+        )
         data.update(self.extra_body)
         return data
+
 
 class LLMCompletionsRequest(BaseModel):
     model: str
@@ -58,9 +62,12 @@ class LLMCompletionsRequest(BaseModel):
 
     def to_payload(self) -> Dict:
         """Convert to payload for the LLM API"""
-        data = self.model_dump(exclude={'user_id', 'opt_out', 'app_title', 'tags', 'extra_body'})
+        data = self.model_dump(
+            exclude={"user_id", "opt_out", "app_title", "tags", "extra_body"}
+        )
         data.update(self.extra_body)
         return data
+
 
 class Function(BaseModel):
     arguments: str
@@ -76,7 +83,7 @@ class Function(BaseModel):
             arguments = ""
         elif isinstance(arguments, Dict):
             arguments = json.dumps(arguments)
-            
+
         super().__init__(arguments=arguments, name=name, **params)
 
     def __contains__(self, key):
@@ -91,9 +98,11 @@ class Function(BaseModel):
     def __setitem__(self, key, value):
         setattr(self, key, value)
 
+
 class FunctionCall(BaseModel):
     arguments: str
     name: Optional[str] = None
+
 
 class ChatCompletionMessageToolCall(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -119,6 +128,7 @@ class ChatCompletionDeltaToolCall(BaseModel):
     type: Optional[str] = None
     index: int
 
+
 class Message(BaseModel):
     content: Optional[str] = None
     role: Literal["assistant"] = "assistant"
@@ -138,11 +148,13 @@ class Message(BaseModel):
 
     def json(self, **kwargs):
         return self.model_dump_json()
-        
+
+
 class TopLogprob(BaseModel):
     token: str
     bytes: Optional[List[int]] = None
     logprob: float
+
 
 class ChatCompletionTokenLogprob(BaseModel):
     token: str
@@ -153,6 +165,7 @@ class ChatCompletionTokenLogprob(BaseModel):
 
 class ChoiceLogprobs(BaseModel):
     content: Optional[List[ChatCompletionTokenLogprob]] = None
+
 
 class Delta(BaseModel):
     content: Optional[str] = None
@@ -171,6 +184,7 @@ class Delta(BaseModel):
 
     def __setitem__(self, key, value):
         setattr(self, key, value)
+
 
 class Choices(BaseModel):
     finish_reason: Optional[str] = "stop"
@@ -229,12 +243,13 @@ class StreamingChoices(BaseModel):
     def __setitem__(self, key, value):
         setattr(self, key, value)
 
+
 class EmbeddingObject(BaseModel):
     object: Literal["embedding"] = "embedding"
     embedding: List[float]
     index: int = 0
 
-    @field_validator('embedding', mode='before')
+    @field_validator("embedding", mode="before")
     @classmethod
     def decode_base64_embedding(cls, v):
         if isinstance(v, str):
@@ -242,12 +257,15 @@ class EmbeddingObject(BaseModel):
             # Assuming little-endian float32 as is common with OpenAI compatible APIs
             byte_data = base64.b64decode(v)
             count = len(byte_data) // 4
-            return list(struct.unpack(f'<{count}f', byte_data))
+            return list(struct.unpack(f"<{count}f", byte_data))
         return v
+
 
 class ModelResponse(BaseModel):
     id: str = Field(default_factory=_generate_id)
-    choices: List[Union[Choices, StreamingChoices]] = Field(default_factory=lambda: [Choices()])
+    choices: List[Union[Choices, StreamingChoices]] = Field(
+        default_factory=lambda: [Choices()]
+    )
     created: int = Field(default_factory=lambda: int(time.time()))
     model: Optional[str] = None
     object: str = "chat.completion"
@@ -256,20 +274,19 @@ class ModelResponse(BaseModel):
     raw_output: Optional[str] = None
     usage: Optional[Usage] = None
     data: Optional[List[EmbeddingObject]] = None
-    
+
     _hidden_params: dict = {}
-    
+
     # Validation headers from upstream
     headers: Optional[Dict[str, str]] = None
 
     def __init__(self, **data):
         super().__init__(**data)
-        
+
         # Determine object type helper
         if not self.object:
-             # Basic heuristic if not provided
-             self.object = "chat.completion"
-
+            # Basic heuristic if not provided
+            self.object = "chat.completion"
 
     def __contains__(self, key):
         return hasattr(self, key)
@@ -279,16 +296,22 @@ class ModelResponse(BaseModel):
 
     def __getitem__(self, key):
         return getattr(self, key)
-    
+
     def json(self, **kwargs):
         return self.model_dump_json()
 
+
 class RetryConstantError(Exception):
     pass
+
+
 class RetryExpoError(Exception):
     pass
+
+
 class UnknownLLMError(Exception):
     pass
+
 
 class ProviderKeySubmission(BaseModel):
     provider: str

@@ -1,9 +1,11 @@
 from pydantic_settings import BaseSettings
 from functools import lru_cache
 
+
 @lru_cache()
 def get_settings():
     return Settings()
+
 
 class Settings(BaseSettings):
     auth0_domain: str
@@ -23,16 +25,18 @@ class Settings(BaseSettings):
     vite_auth0_client_id: str
     vite_auth0_domain: str
     firebase_service_account_json: str
+
     class Config:
         env_file = ".env"
+
 
 def parse_hardware_info(hardware_info):
     """
     Parse hardware information and return a string representation.
-    
+
     Args:
         hardware_info (dict): Dictionary containing hardware information
-        
+
     Returns:
         str: String representation of the hardware in the format "Nx[Spec]"
     """
