@@ -24,6 +24,7 @@ def get_statistics(api_key: Optional[str] = None, ttl_hash=None):
     # Basic authentication credentials
     username = os.getenv("LANGFUSE_PUBLIC_KEY")
     password = os.getenv("LANGFUSE_SECRET_KEY")
+    data = {}
     try:
         # Make API request with basic authentication
         response = requests.get(lf_endpoint, auth=(username, password))
