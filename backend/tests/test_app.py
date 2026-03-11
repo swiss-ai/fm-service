@@ -58,10 +58,10 @@ def test_app_routes_registered(client):
 
 
 def test_models_endpoint_no_auth(client):
-    """/v1/models should work without auth."""
+    """/v1/models should return 200 even when OCF is unreachable."""
     response = client.get("/v1/models")
-    # May fail to reach OCF but should not be a 500 from our code
-    assert response.status_code in (200, 500)
+    assert response.status_code == 200
+    assert response.json()["object"] == "list"
 
 
 def test_chat_completions_requires_auth(client):

@@ -3,7 +3,10 @@ from backend.config import parse_hardware_info
 
 
 def get_all_models(endpoint: str, with_details: bool = False):
-    data = requests.get(endpoint).json()
+    try:
+        data = requests.get(endpoint).json()
+    except Exception:
+        return []
     models = []
     for node_info in data.values():
         # Only include nodes that are currently connected
