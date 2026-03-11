@@ -1,11 +1,11 @@
-.PHONY: install install-dev format check test dev
+.PHONY: install install-dev format check test run
 
 UV_EXTRA ?=
 
 install:
 	uv pip install $(UV_EXTRA) -r backend/requirements.txt
 
-install-dev:
+install-run:
 	uv pip install $(UV_EXTRA) -r backend/requirements-dev.txt
 
 format:
@@ -19,5 +19,5 @@ check:
 test:
 	pytest backend/tests/ -v
 
-dev:
+run:
 	uvicorn backend.main:app --reload --host 0.0.0.0 --port 8080

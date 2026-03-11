@@ -55,10 +55,8 @@ docker compose up
 ### Local Development
 
 ```bash
-# backend
-cd backend
-uv pip install -r requirements.txt
-uv run uvicorn backend.main:app --reload --port 8080
+make install      # install backend dependencies
+make run          # start backend on :8080
 
 # frontend
 cd frontend
