@@ -66,7 +66,9 @@ def test_models_endpoint_no_auth(client):
 
 def test_chat_completions_requires_auth(client):
     """/v1/chat/completions should reject unauthenticated requests."""
-    response = client.post("/v1/chat/completions", json={"model": "test", "messages": []})
+    response = client.post(
+        "/v1/chat/completions", json={"model": "test", "messages": []}
+    )
     assert response.status_code in (401, 403)
 
 
