@@ -15,7 +15,7 @@ jobs:
         with:
           python-version: "3.12"
       - uses: astral-sh/setup-uv@v4
-      - run: uv pip install --system ruff
+      - run: make install-dev
       - run: make check
 
   test:
@@ -42,7 +42,7 @@ jobs:
         with:
           python-version: "3.12"
       - uses: astral-sh/setup-uv@v4
-      - run: uv pip install --system -r backend/requirements.txt pytest
+      - run: make install-dev
       - run: make test
 
   docker-backend:

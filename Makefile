@@ -1,4 +1,10 @@
-.PHONY: format check test dev
+.PHONY: install install-dev format check test dev
+
+install:
+	uv pip install -r backend/requirements.txt
+
+install-dev:
+	uv pip install -r backend/requirements-dev.txt
 
 format:
 	ruff check --fix backend/
