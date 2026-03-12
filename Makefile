@@ -5,7 +5,7 @@ UV_EXTRA ?=
 install:
 	uv pip install $(UV_EXTRA) -r backend/requirements.txt
 
-install-run:
+install-dev:
 	uv pip install $(UV_EXTRA) -r backend/requirements-dev.txt
 
 format:
