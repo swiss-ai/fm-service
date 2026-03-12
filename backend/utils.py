@@ -8,11 +8,12 @@ import aiohttp
 from typing import Optional
 from functools import lru_cache
 import time
-from proxy.config import parse_hardware_info, get_settings
+from backend.config import parse_hardware_info, get_settings
 
 logger = logging.getLogger(__name__)
 
 base_endpoint = "https://cloud.langfuse.com/api/public/metrics/daily"
+
 
 @lru_cache()
 def get_statistics(api_key: Optional[str] = None, ttl_hash=None):
@@ -23,6 +24,7 @@ def get_statistics(api_key: Optional[str] = None, ttl_hash=None):
     # Basic authentication credentials
     username = os.getenv("LANGFUSE_PUBLIC_KEY")
     password = os.getenv("LANGFUSE_SECRET_KEY")
+    data = {}
     try:
         # Make API request with basic authentication
         response = requests.get(lf_endpoint, auth=(username, password))
@@ -40,9 +42,11 @@ def get_statistics(api_key: Optional[str] = None, ttl_hash=None):
         print(f"Error: {err}")
     return data
 
+
 def get_ttl_hash(seconds=24 * 3600):
     """Return the same value withing `seconds` time period"""
     return round(time.time() / seconds)
+
 
 @lru_cache(maxsize=128)
 def get_hardware_spec(node_id: str, dnt_endpoint: str) -> str:
@@ -63,8 +67,10 @@ def get_hardware_spec(node_id: str, dnt_endpoint: str) -> str:
         logger.warning(f"Failed to fetch hardware info for node {node_id}: {e}")
     return "Unknown"
 
+
 # Async cache for metrics
 _metrics_cache = {}
+
 
 async def get_langfuse_metrics(query_json: dict, ttl_hash: int = None):
     """
@@ -80,7 +86,7 @@ async def get_langfuse_metrics(query_json: dict, ttl_hash: int = None):
     settings = get_settings()
     encoded_query = urllib.parse.quote(query_str)
     url = f"{settings.langfuse_host}/api/public/v2/metrics?query={encoded_query}"
-    
+
     auth_s = f"{settings.langfuse_public_key}:{settings.langfuse_secret_key}"
     auth_b64 = base64.b64encode(auth_s.encode()).decode()
     headers = {"Authorization": f"Basic {auth_b64}"}

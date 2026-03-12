@@ -1,38 +1,42 @@
 from pydantic_settings import BaseSettings
 from functools import lru_cache
 
+
 @lru_cache()
 def get_settings():
     return Settings()
 
+
 class Settings(BaseSettings):
-    auth0_domain: str
-    auth0_api_audience: str
-    auth0_issuer: str
-    auth0_algorithms: str
-    auth0_client_id: str
-    auth0_client_secret: str
-    logfire_token: str
-    database_url: str
-    auth_secret: str
+    auth0_domain: str = ""
+    auth0_api_audience: str = ""
+    auth0_issuer: str = ""
+    auth0_algorithms: str = "RS256"
+    auth0_client_id: str = ""
+    auth0_client_secret: str = ""
+    logfire_token: str = ""
+    database_url: str = ""
+    auth_secret: str = ""
     auth_trust_host: bool = False
-    ocf_head_addr: str
-    langfuse_host: str
-    langfuse_public_key: str
-    langfuse_secret_key: str
-    vite_auth0_client_id: str
-    vite_auth0_domain: str
-    firebase_service_account_json: str
+    ocf_head_addr: str = ""
+    langfuse_host: str = ""
+    langfuse_public_key: str = ""
+    langfuse_secret_key: str = ""
+    vite_auth0_client_id: str = ""
+    vite_auth0_domain: str = ""
+    firebase_service_account_json: str = ""
+
     class Config:
         env_file = ".env"
+
 
 def parse_hardware_info(hardware_info):
     """
     Parse hardware information and return a string representation.
-    
+
     Args:
         hardware_info (dict): Dictionary containing hardware information
-        
+
     Returns:
         str: String representation of the hardware in the format "Nx[Spec]"
     """

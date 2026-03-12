@@ -2,11 +2,11 @@
 import pytest
 from unittest.mock import MagicMock, patch
 from fastapi.testclient import TestClient
-from proxy.main import app, get_perf_data
+from backend.main import app, get_perf_data
 
 client = TestClient(app)
 
-@patch("proxy.metrics.metrics_collector.db")
+@patch("backend.metrics.metrics_collector.db")
 def test_get_perf_endpoint(mock_db):
     # Setup mock
     mock_collection = MagicMock()

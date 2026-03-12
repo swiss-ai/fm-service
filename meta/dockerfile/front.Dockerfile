@@ -1,7 +1,7 @@
-FROM node:lts AS runtime
+FROM node:22-slim AS runtime
 WORKDIR /app
 
-COPY apps/home/ .
+COPY frontend/ .
 RUN npm install
 RUN npm run build
 

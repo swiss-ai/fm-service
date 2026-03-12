@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import MagicMock, patch, ANY
 import time
-from proxy.metrics import MetricsCollector
+from backend.metrics import MetricsCollector
 
 class TestMetricsCollector(unittest.TestCase):
     def setUp(self):

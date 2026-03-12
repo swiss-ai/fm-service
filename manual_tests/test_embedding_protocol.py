@@ -1,5 +1,5 @@
 
-from proxy.protocols import ModelResponse, EmbeddingObject
+from backend.protocols import ModelResponse, EmbeddingObject
 import json
 import base64
 import struct

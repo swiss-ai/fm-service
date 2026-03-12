@@ -5,11 +5,14 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+
 class RedisTokenCache:
-    def __init__(self, host: str = None, port: int = 6379, db: int = 0, password: str = None):
+    def __init__(
+        self, host: str = None, port: int = 6379, db: int = 0, password: str = None
+    ):
         """
         Initialize Redis connection for token caching
-        
+
         Args:
             host: Redis host (defaults to REDIS_HOST env var or localhost)
             port: Redis port (defaults to 6379)
@@ -20,7 +23,7 @@ class RedisTokenCache:
         self.port = port
         self.db = db
         self.password = password or os.environ.get("REDIS_PASSWORD")
-        
+
         try:
             self.redis_client = redis.Redis(
                 host=self.host,
@@ -31,7 +34,7 @@ class RedisTokenCache:
                 socket_connect_timeout=5,
                 socket_timeout=5,
                 retry_on_timeout=True,
-                health_check_interval=30
+                health_check_interval=30,
             )
             # Test connection
             self.redis_client.ping()
@@ -41,15 +44,15 @@ class RedisTokenCache:
             # Fallback to in-memory set for development/testing
             self.redis_client = None
             self._fallback_cache = set()
-    
+
     def add_token(self, token: str, ttl: int = 3600) -> bool:
         """
         Add a token to the cache with optional TTL
-        
+
         Args:
             token: The token to cache
             ttl: Time to live in seconds (default: 1 hour)
-            
+
         Returns:
             True if successful, False otherwise
         """
@@ -63,14 +66,14 @@ class RedisTokenCache:
         except Exception as e:
             logger.error(f"Error adding token to cache: {e}")
             return False
-    
+
     def has_token(self, token: str) -> bool:
         """
         Check if a token exists in the cache
-        
+
         Args:
             token: The token to check
-            
+
         Returns:
             True if token exists, False otherwise
         """
@@ -82,14 +85,14 @@ class RedisTokenCache:
         except Exception as e:
             logger.error(f"Error checking token in cache: {e}")
             return False
-    
+
     def remove_token(self, token: str) -> bool:
         """
         Remove a token from the cache
-        
+
         Args:
             token: The token to remove
-            
+
         Returns:
             True if successful, False otherwise
         """
@@ -105,11 +108,11 @@ class RedisTokenCache:
         except Exception as e:
             logger.error(f"Error removing token from cache: {e}")
             return False
-    
+
     def clear_cache(self) -> bool:
         """
         Clear all tokens from the cache
-        
+
         Returns:
             True if successful, False otherwise
         """
@@ -126,11 +129,11 @@ class RedisTokenCache:
         except Exception as e:
             logger.error(f"Error clearing cache: {e}")
             return False
-    
+
     def get_cache_stats(self) -> dict:
         """
         Get cache statistics
-        
+
         Returns:
             Dictionary with cache statistics
         """
@@ -143,20 +146,22 @@ class RedisTokenCache:
                     "token_count": len(keys),
                     "memory_usage": info.get("used_memory_human", "N/A"),
                     "connections": info.get("connected_clients", 0),
-                    "redis_version": info.get("redis_version", "N/A")
+                    "redis_version": info.get("redis_version", "N/A"),
                 }
             else:
                 return {
                     "connected": False,
                     "token_count": len(self._fallback_cache),
-                    "fallback_mode": True
+                    "fallback_mode": True,
                 }
         except Exception as e:
             logger.error(f"Error getting cache stats: {e}")
             return {"error": str(e)}
 
+
 # Global instance
 _token_cache = None
+
 
 def get_token_cache() -> RedisTokenCache:
     """Get the global token cache instance"""
