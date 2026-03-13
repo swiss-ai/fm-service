@@ -1,3 +1,5 @@
+import logging
+import time
 from contextlib import asynccontextmanager
 from sqlmodel import create_engine
 from typing import Annotated
@@ -5,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, HTTPException, Depends, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.responses import StreamingResponse
+from starlette.middleware.base import BaseHTTPMiddleware
 from backend.llm_proxy import (
     llm_proxy,
     response_generator,
@@ -59,7 +62,36 @@ async def lifespan(app: FastAPI):
     engine = None
 
 
+access_logger = logging.getLogger("access")
+
+
+class AccessLogMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        start = time.time()
+        response = await call_next(request)
+        duration_ms = (time.time() - start) * 1000
+        token = request.headers.get("authorization", "")
+        if token.startswith("Bearer "):
+            # Log last 8 chars only for identification without exposing full key
+            token = f"...{token[-8:]}"
+        else:
+            token = "-"
+        access_logger.info(
+            "%s %s %s %d %.0fms",
+            token,
+            request.method,
+            request.url.path,
+            response.status_code,
+            duration_ms,
+        )
+        return response
+
+
 app = FastAPI(lifespan=lifespan)
+
+if settings.access_log:
+    logging.basicConfig(level=logging.INFO)
+    app.add_middleware(AccessLogMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
