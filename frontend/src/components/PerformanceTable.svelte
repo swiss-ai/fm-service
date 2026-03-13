@@ -51,7 +51,7 @@
 
   onMount(async () => {
     try {
-      const response = await fetch('https://api.swissai.cscs.ch/v1/perf');
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://api.swissai.cscs.ch'}/v1/perf`);
       if (!response.ok) throw new Error('Failed to fetch performance data');
       const json = await response.json();
       data = json.data || [];

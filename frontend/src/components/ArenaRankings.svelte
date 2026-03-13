@@ -84,7 +84,7 @@
       // Ensuring UTC 00:00:00 might match the user's curl example better:
       // "2025-12-01T00:00:00Z"
       
-      const response = await fetch("https://api.swissai.cscs.ch/v1/metrics", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://api.swissai.cscs.ch'}/v1/metrics`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
