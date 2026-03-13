@@ -3,6 +3,8 @@ import PageLayout from "@layouts/PageLayout.astro";
 import Container from "@components/Container.astro";
 import ArenaRankings from "@components/ArenaRankings.svelte";
 
+export const prerender = false;
+
 let tokenData = {};
 let error = null;
 
