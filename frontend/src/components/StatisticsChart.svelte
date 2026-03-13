@@ -22,7 +22,7 @@
         throw new Error('No API key found. Please log in and get your API key first.');
       }
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/v1/statistics`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://api.swissai.cscs.ch'}/v1/statistics`, {
         headers: {
           'Authorization': `Bearer ${apiKey}`
         }
