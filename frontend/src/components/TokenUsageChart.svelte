@@ -9,7 +9,7 @@
 
   const fetchStatistics = async () => {
     try {
-      const response = await fetch('https://api.swissai.cscs.ch/v1/statistics');
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/v1/statistics`);
       if (!response.ok) throw new Error('Failed to fetch statistics');
       const data = await response.json();
       debugInfo += `Data received: ${JSON.stringify(data)}\n`;

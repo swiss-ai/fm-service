@@ -7,7 +7,7 @@
     let error = null;
     onMount(async () => {
         try {
-            const response = await fetch("https://api.swissai.cscs.ch/v1/models_detailed");
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/v1/models_detailed`);
             const data = await response.json();
             const rawModels = data.data;
 
