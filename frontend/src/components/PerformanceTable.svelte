@@ -1,6 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import { getModelLogo } from '@lib/modelLogos';
+  import { getApiUrl } from '../lib/config';
 
   let data = [];
   let loading = true;
@@ -51,7 +52,7 @@
 
   onMount(async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://api.swissai.cscs.ch'}/v1/perf`);
+      const response = await fetch(`${getApiUrl()}/v1/perf`);
       if (!response.ok) throw new Error('Failed to fetch performance data');
       const json = await response.json();
       data = json.data || [];

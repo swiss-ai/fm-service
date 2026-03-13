@@ -1,3 +1,5 @@
+import { getApiUrl } from './config';
+
 // Authentication utilities for the Research Computer app
 
 /**
@@ -56,7 +58,7 @@ export function clearApiKey(): void {
  */
 export async function verifyAccessToken(accessToken: string): Promise<any> {
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://api.swissai.cscs.ch'}/v1/profile`, {
+    const response = await fetch(`${getApiUrl()}/v1/profile`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -93,7 +95,7 @@ export async function getUserProfile(): Promise<any> {
   }
   
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://api.swissai.cscs.ch'}/v1/profile`, {
+    const response = await fetch(`${getApiUrl()}/v1/profile`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

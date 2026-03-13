@@ -1,13 +1,14 @@
 <script>
     import { onMount } from "svelte";
     import ModelCard from "./ModelCard.svelte";
+    import { getApiUrl } from "../../lib/config";
 
     let models = [];
     let loading = true;
     let error = null;
     onMount(async () => {
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://api.swissai.cscs.ch'}/v1/models_detailed`);
+            const response = await fetch(`${getApiUrl()}/v1/models_detailed`);
             const data = await response.json();
             const rawModels = data.data;
 
