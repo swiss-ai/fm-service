@@ -126,7 +126,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: breithorn-poc/rob-poc
-          token: ${{ secrets.ARGOCD_PAT }}
+          token: ${{ secrets.ARGO_PAT }}
           path: argocd
       - name: Update backend image tag
         if: needs.changes.outputs.backend == 'true'
