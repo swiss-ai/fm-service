@@ -1,6 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import Chart from 'chart.js/auto';
+  import { getApiUrl } from '../lib/config';
 
   let chart;
   let loading = true;
@@ -9,7 +10,7 @@
 
   const fetchStatistics = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://api.swissai.cscs.ch'}/v1/statistics`);
+      const response = await fetch(`${getApiUrl()}/v1/statistics`);
       if (!response.ok) throw new Error('Failed to fetch statistics');
       const data = await response.json();
       debugInfo += `Data received: ${JSON.stringify(data)}\n`;

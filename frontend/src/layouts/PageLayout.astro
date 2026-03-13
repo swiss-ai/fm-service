@@ -10,12 +10,16 @@ type Props = {
 };
 
 const { title, description } = Astro.props;
+const apiUrl = process.env.VITE_API_URL || 'https://api.swissai.cscs.ch';
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
     <Head title={`${title} | ${SITE.NAME}`} description={description} />
+    <script define:vars={{ apiUrl }}>
+      window.__API_URL__ = apiUrl;
+    </script>
   </head>
   <body>
     <Header />

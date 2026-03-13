@@ -2,6 +2,7 @@
   import { onMount, onDestroy } from 'svelte';
   import type { StatisticsResponse } from '../types/statistics';
   import { Chart } from 'chart.js/auto';
+  import { getApiUrl } from '../lib/config';
 
   let chartInstance: Chart | null = null;
   let statistics: StatisticsResponse | null = null;
@@ -22,7 +23,7 @@
         throw new Error('No API key found. Please log in and get your API key first.');
       }
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://api.swissai.cscs.ch'}/v1/statistics`, {
+      const response = await fetch(`${getApiUrl()}/v1/statistics`, {
         headers: {
           'Authorization': `Bearer ${apiKey}`
         }
